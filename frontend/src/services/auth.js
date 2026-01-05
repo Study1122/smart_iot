@@ -34,3 +34,22 @@ export const login = async (email, password) => {
     };
   }
 };
+
+export const getMe = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(`${API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    return res.data;
+  } catch (err) {
+    return {
+      success: false,
+      message: "Unauthorized",
+    };
+  }
+};

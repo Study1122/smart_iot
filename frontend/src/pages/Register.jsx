@@ -21,7 +21,14 @@ const Register = () => {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div 
+      style={{ 
+        padding: "2rem" , 
+        display: "flex",
+        flexDirection: "column",
+        justfyContent: "center",
+        alignItems: "center",
+      }}>
       <h1 style={{ 
         textAlign: "center", 
         marginBottom: "1rem" 

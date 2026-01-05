@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/auth.routes.js";
+import deviceRoutes from "./routes/device.routes.js";
+import telemetryRoutes from "./routes/telemetry.routes.js";
+
 
 const app = express();
 
@@ -13,5 +16,6 @@ app.get("/", (req, res) => {
 
 //user routes
 app.use("/auth", authRoutes);
-
+app.use("/devices", deviceRoutes);
+app.use("/telemetry", telemetryRoutes);
 export default app;
