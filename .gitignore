@@ -1,0 +1,29 @@
+# Paste the content from the previous step, save & exit 
+# ====Node / Backend ======
+backend/node_modules/ 
+backend/.env 
+backend/dist/ 
+backend/.DS_Store 
+backend/npm-debug.log* 
+backend/yarn-debug.log* 
+backend/yarn-error.log*
+# ======== React / Frontend # ========
+frontend/node_modules/ 
+frontend/dist/ 
+frontend/.env 
+frontend/.DS_Store 
+frontend/npm-debug.log* 
+frontend/yarn-debug.log* 
+frontend/yarn-error.log*
+# ========================= General / OS =========================
+.DS_Store 
+Thumbs.db 
+.env.local 
+.env.*.local
+# ========================= IDEs / Editors =========================
+.vscode/ 
+.idea/ 
+*.suo 
+*.ntvs* 
+*.njsproj
+*.sln
