@@ -183,11 +183,15 @@ export const getDeviceCommands = async (req, res) => {
 
     res.json({
       success: true,
-      commands: device.features.map((f) => ({
-        featureId: f.featureId,
-        type: f.type,
-        desiredState: f.desiredState,
-      })),
+      commands: 
+        
+        device.features.map((f) => ({
+        
+          featureId: f.featureId,
+          type: f.type,
+          desiredState: f.desiredState,
+          reportedState: f.reportedState,
+        })),
     });
   } catch (error) {
     res.status(500).json({
@@ -222,6 +226,28 @@ export const reportDeviceState = async (req, res) => {
     res.json({
       success: true,
       message: "Device state reported",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+
+export const deviceHeartbeat = async (req, res) => {
+  try {
+    const device = req.device;
+
+    device.lastSeen = new Date();
+    device.status = "online";
+    await device.save();
+
+    res.json({
+      success: true,
+      message: "Heartbeat received",
     });
   } catch (error) {
     res.status(500).json({

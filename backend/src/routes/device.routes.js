@@ -6,7 +6,8 @@ import {
   addDeviceFeature,
   toggleDeviceFeature,
   getDeviceCommands,
-  reportDeviceState
+  reportDeviceState,
+  deviceHeartbeat
 } from "../controllers/device.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import deviceAuthMiddleware from "../middlewares/deviceAuth.middleware.js";
@@ -29,7 +30,10 @@ router.post("/report",
   deviceAuthMiddleware,
   reportDeviceState);
 
-
+//
+router.post("/heartbeat", deviceAuthMiddleware,
+  deviceHeartbeat
+);
 router.post("/", authMiddleware, registerDevice);
 router.get("/", authMiddleware, getUserDevices);
 router.get("/:id", authMiddleware, getDeviceById);
