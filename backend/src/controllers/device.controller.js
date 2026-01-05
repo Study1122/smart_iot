@@ -93,6 +93,18 @@ export const addDeviceFeature = async (req, res) => {
   try {
     const { id } = req.params;
     const { featureId, name, type } = req.body;
+    
+    //check existing featureId for same device
+    const exists = device.features.some(
+      (f) => f.featureId === featureId
+    );
+    
+    if (exists) {
+      return res.status(400).json({
+        success: false,
+        message: "FeatureId must be unique per device",
+      });
+    }
 
     const device = await Device.findOne({
       _id: id,
@@ -256,3 +268,176 @@ export const deviceHeartbeat = async (req, res) => {
     });
   }
 };
+
+/**
+ * Update device name (user action)
+ */
+export const updateDevice = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Device name is required",
+      });
+    }
+
+    const device = await Device.findOne({
+      _id: id,
+      owner: req.user._id,
+    });
+
+    if (!device) {
+      return res.status(404).json({
+        success: false,
+        message: "Device not found",
+      });
+    }
+
+    device.name = name;
+    await device.save();
+
+    res.json({
+      success: true,
+      message: "Device updated successfully",
+      device,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Delete device (user action)
+ */
+export const deleteDevice = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const device = await Device.findOneAndDelete({
+      _id: id,
+      owner: req.user._id,
+    });
+
+    if (!device) {
+      return res.status(404).json({
+        success: false,
+        message: "Device not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Device deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Update feature metadata (name/type) – user action
+ */
+export const updateDeviceFeatureMeta = async (req, res) => {
+  try {
+    const { id, featureId } = req.params;
+    const { name, type } = req.body;
+
+    const device = await Device.findOne({
+      _id: id,
+      owner: req.user._id,
+    });
+
+    if (!device) {
+      return res.status(404).json({
+        success: false,
+        message: "Device not found",
+      });
+    }
+
+    const feature = device.features.find(
+      (f) => f.featureId === featureId
+    );
+
+    if (!feature) {
+      return res.status(404).json({
+        success: false,
+        message: "Feature not found",
+      });
+    }
+
+    if (name) feature.name = name;
+    if (type) feature.type = type;
+
+    feature.lastUpdated = new Date();
+    await device.save();
+
+    res.json({
+      success: true,
+      message: "Feature updated successfully",
+      feature,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+/**
+ * Delete feature – user action
+ */
+export const deleteDeviceFeature = async (req, res) => {
+  try {
+    const { id, featureId } = req.params;
+
+    const device = await Device.findOne({
+      _id: id,
+      owner: req.user._id,
+    });
+
+    if (!device) {
+      return res.status(404).json({
+        success: false,
+        message: "Device not found",
+      });
+    }
+
+    const featureExists = device.features.some(
+      (f) => f.featureId === featureId
+    );
+
+    if (!featureExists) {
+      return res.status(404).json({
+        success: false,
+        message: "Feature not found",
+      });
+    }
+
+    device.features = device.features.filter(
+      (f) => f.featureId !== featureId
+    );
+
+    await device.save();
+
+    res.json({
+      success: true,
+      message: "Feature deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
-import { getUserDevices } from "../services/device";
+import { getUserDevices, createDevice } from "../services/device";
 import Navbar from "../components/Navbar/Navbar";
 const Dashboard = () => {
   
@@ -9,7 +9,6 @@ const Dashboard = () => {
   const [devices, setDevices] = useState([]);
   
   const navigate = useNavigate();
-
   useEffect(() => {
     const init = async () => {
       const res = await getMe();
@@ -28,9 +27,28 @@ const Dashboard = () => {
         setDevices(deviceRes.devices);
       }
     };
-    
     init();
   }, [navigate]);
+  
+  const handleAddDevice = async () => {
+  const name = prompt("Enter device name:");
+  if (!name) return;
+
+  const deviceId = prompt("Enter unique device ID:");
+  if (!deviceId) return;
+
+  const res = await createDevice({ name, deviceId });
+
+  if (res.success) {
+    alert("Device added successfully");
+    const deviceRes = await getUserDevices();
+    if (deviceRes.success) {
+      setDevices(deviceRes.devices);
+    }
+  } else {
+    alert(res.message || "Failed to add device");
+  }
+};
 
   if (!user) {
     return <p>Loading...</p>;
@@ -48,11 +66,22 @@ const Dashboard = () => {
         <h3 style={{ marginTop: "1rem" }}>Your Devices</h3>
 
         {devices.length === 0 && <p>No devices registered yet.</p>}
-
+        <button
+          onClick={handleAddDevice}
+          style={{
+            marginBottom: "1rem",
+            padding: "8px 12px",
+            borderRadius: "6px",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          ➕ Add Device
+        </button>
         <ul>
           {devices.map((device) => (
             <li key={device._id} style={{ margin: "0.5rem 0" }}
-            onClick={() => navigate(`/device/${device._id}`)}>
+              onClick={() => navigate(`/device/${device._id}`)}>
               <strong>{device.name}</strong> — {device.deviceId}
             </li>
           ))}

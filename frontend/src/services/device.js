@@ -65,3 +65,26 @@ export const toggleFeature = async (deviceId, featureId, state) => {
   }
 };
 
+// ➕ Create new device (UI use)
+export const createDevice = async (data) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.post(
+      API_URL,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return res.data; // { success, device }
+  } catch (err) {
+    return {
+      success: false,
+      message: err.response?.data?.message || "Failed to create device",
+    };
+  }
+};

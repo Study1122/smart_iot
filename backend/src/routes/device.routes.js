@@ -7,7 +7,11 @@ import {
   toggleDeviceFeature,
   getDeviceCommands,
   reportDeviceState,
-  deviceHeartbeat
+  deviceHeartbeat,
+  updateDevice,
+  deleteDevice,
+  updateDeviceFeatureMeta,
+  deleteDeviceFeature,
 } from "../controllers/device.controller.js";
 import authMiddleware from "../middlewares/auth.middleware.js";
 import deviceAuthMiddleware from "../middlewares/deviceAuth.middleware.js";
@@ -36,9 +40,18 @@ router.post("/heartbeat", deviceAuthMiddleware,
 );
 router.post("/", authMiddleware, registerDevice);
 router.get("/", authMiddleware, getUserDevices);
+router.patch("/:id", authMiddleware, updateDevice);
+router.delete("/:id", authMiddleware, deleteDevice);
 router.get("/:id", authMiddleware, getDeviceById);
 router.post("/:id/features",authMiddleware,addDeviceFeature);
 router.patch("/:id/features/:featureId",authMiddleware,
   toggleDeviceFeature);
+// 🔹 FEATURE MANAGEMENT (USER)
+router.patch("/:id/features/:featureId/meta",authMiddleware,
+  updateDeviceFeatureMeta
+);
+router.delete("/:id/features/:featureId",authMiddleware,
+  deleteDeviceFeature
+);
 
 export default router;

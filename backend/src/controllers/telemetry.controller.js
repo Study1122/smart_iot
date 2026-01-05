@@ -31,3 +31,4 @@ export const createTelemetry = async (req, res) => {
     });
   }
 };
+
