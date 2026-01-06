@@ -66,6 +66,19 @@ const deviceSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        // 🌀 FAN LEVEL (NEW)
+        desiredLevel: {
+          type: Number,
+          min: 0,
+          max: 5,
+          default: 0,
+        },
+        reportedLevel: {
+          type: Number,
+          min: 0,
+          max: 5,
+          default: 0,
+        },
         gpio: {
           type: Number,
           default: null, // important for backward compatibility

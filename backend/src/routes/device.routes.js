@@ -5,6 +5,7 @@ import {
   getDeviceById,
   addDeviceFeature,
   toggleDeviceFeature,
+  updateDeviceFeatureLevel,
   getDeviceCommands,
   reportDeviceState,
   deviceHeartbeat,
@@ -44,8 +45,12 @@ router.patch("/:id", authMiddleware, updateDevice);
 router.delete("/:id", authMiddleware, deleteDevice);
 router.get("/:id", authMiddleware, getDeviceById);
 router.post("/:id/features",authMiddleware,addDeviceFeature);
+// 💡 FEATURE State (Bulb)
 router.patch("/:id/features/:featureId",authMiddleware,
   toggleDeviceFeature);
+// 🌀 FEATURE LEVEL (FAN SPEED)
+router.patch("/:id/features/:featureId/level",authMiddleware,
+  updateDeviceFeatureLevel);
 // 🔹 FEATURE MANAGEMENT (USER)
 router.patch("/:id/features/:featureId/meta",authMiddleware,
   updateDeviceFeatureMeta

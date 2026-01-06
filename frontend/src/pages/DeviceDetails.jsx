@@ -8,6 +8,7 @@ import {
   toggleFeature,
   addFeature,
   updateFeatureMeta,
+  updateFeatureLevel,
   deleteFeature,
 } from "../services/deviceService";
 
@@ -34,13 +35,16 @@ const DeviceDetails = () => {
   /* ---------------- TOGGLE FEATURE ---------------- */
   const handleToggle = async (feature) => {
     if (!currentDevice) return;
-
+  
+    // ❗ Fan should NOT be toggled by switch
+    if (feature.type === "fan") return;
+  
     const res = await toggleFeature(
       currentDevice._id,
       feature.featureId,
       !feature.desiredState
     );
-
+  
     if (res.success) {
       setCurrentDevice((prev) => ({
         ...prev,
@@ -50,6 +54,33 @@ const DeviceDetails = () => {
             : f
         ),
       }));
+    } else {
+      alert(res.message);
+    }
+  };
+  
+  /* ---------------- FAN LEVEL ---------------- */
+  const handleFanLevelChange = async (feature, level) => {
+    if (!currentDevice) return;
+  
+    // Optimistic UI update
+    setCurrentDevice((prev) => ({
+      ...prev,
+      features: prev.features.map((f) =>
+        f.featureId === feature.featureId
+          ? { ...f, desiredLevel: level, desiredState: level > 0 }
+          : f
+      ),
+    }));
+  
+    const res = await updateFeatureLevel(
+      currentDevice._id,
+      feature.featureId,
+      level
+    );
+  
+    if (!res.success) {
+      alert(res.message);
     }
   };
 
@@ -359,28 +390,21 @@ const DeviceDetails = () => {
                 </div>
                 
                 {/* FAN SPEED SLIDER */}
-                {feature.type === "fan" && feature.desiredState && (
+                {feature.type === "fan" && (
                   <div style={{ marginTop: ".75rem" }}>
                     <label style={{ fontSize: 13 }}>
-                      Speed: <strong>{feature.level ?? 0}</strong>
+                      Speed: <strong>{feature.desiredLevel}</strong>
                     </label>
+                
                     <input
                       type="range"
                       min={0}
                       max={5}
-                      value={feature.level ?? 0}
+                      value={feature.desiredLevel}
                       disabled={isPending || currentDevice.status !== "online"}
-                      onChange={(e) => {
-                        const newLevel = Number(e.target.value);
-                        setCurrentDevice((prev) => ({
-                          ...prev,
-                          features: prev.features.map((f) =>
-                            f.featureId === feature.featureId
-                              ? { ...f, level: newLevel }
-                              : f
-                          ),
-                        }));
-                      }}
+                      onChange={(e) =>
+                        handleFanLevelChange(feature, Number(e.target.value))
+                      }
                       style={{ width: "100%" }}
                     />
                   </div>

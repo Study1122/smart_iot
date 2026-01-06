@@ -92,12 +92,19 @@ export const getDeviceById = async (req, res) => {
 export const addDeviceFeature = async (req, res) => {
   try {
     const { id } = req.params;
-    const { featureId, name, type } = req.body;
+    const { featureId, name, type, gpio } = req.body;
 
     const device = await Device.findOne({
       _id: id,
       owner: req.user._id,
     });
+    
+    if (gpio === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "GPIO pin is required",
+      });
+    }
 
     if (!device) {
       return res.status(404).json({
@@ -122,8 +129,12 @@ export const addDeviceFeature = async (req, res) => {
     const allowedGpios = [0, 2, 4, 5, 12, 13, 14, 15, 16];
 
     if (gpio !== undefined && !allowedGpios.includes(gpio)) {
-      throw new ApiError(400, "Invalid GPIO pin");
+      return res.status(400).json({
+        success: false,
+        message: "Invalid GPIO pin",
+      });
     }
+
     
     // prevent duplicate GPIO per device
     const gpioUsed = device.features.some(
@@ -131,16 +142,21 @@ export const addDeviceFeature = async (req, res) => {
     );
     
     if (gpioUsed) {
-      throw new ApiError(400, "GPIO already in use on this device");
+      return res.status(400).json({
+        success: false,
+        message: "GPIO already in use on this device",
+      });
     }
 
     device.features.push({
       featureId,
       name,
       type,
+      gpio,
       desiredState: false,
       reportedState: false,
-      gpio,
+      desiredLevel: type === "fan" ? 0 : undefined,
+      reportedLevel: type === "fan" ? 0 : undefined,
       lastUpdated: new Date(),
     });
 
@@ -181,11 +197,18 @@ export const toggleDeviceFeature = async (req, res) => {
     const feature = device.features.find(
       (f) => f.featureId === featureId
     );
-
+    
     if (!feature) {
       return res.status(404).json({
         success: false,
         message: "Feature not found",
+      });
+    }
+    
+    if (feature.type === "fan") {
+      return res.status(400).json({
+        success: false,
+        message: "Use level endpoint to control fan",
       });
     }
 
@@ -208,22 +231,103 @@ export const toggleDeviceFeature = async (req, res) => {
   }
 };
 
-export const getDeviceCommands = async (req, res) => {
+/**
+ * Update feature level (fan speed) – user action
+ */
+export const updateDeviceFeatureLevel = async (req, res) => {
   try {
-    const device = req.device;
+    const { id, featureId } = req.params;
+    const { level } = req.body;
+
+    if (level === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Level is required",
+      });
+    }
+
+    if (level < 0 || level > 5) {
+      return res.status(400).json({
+        success: false,
+        message: "Level must be between 0 and 5",
+      });
+    }
+
+    const device = await Device.findOne({
+      _id: id,
+      owner: req.user._id,
+    });
+
+    if (!device) {
+      return res.status(404).json({
+        success: false,
+        message: "Device not found",
+      });
+    }
+
+    const feature = device.features.find(
+      (f) => f.featureId === featureId
+    );
+
+    if (!feature) {
+      return res.status(404).json({
+        success: false,
+        message: "Feature not found",
+      });
+    }
+
+    if (feature.type !== "fan") {
+      return res.status(400).json({
+        success: false,
+        message: "Level control is only supported for fan features",
+      });
+    }
+
+    // 🌀 update desired level
+    feature.desiredLevel = level;
+
+    // auto ON/OFF sync
+    feature.desiredState = level > 0;
+
+    feature.lastUpdated = new Date();
+    await device.save();
 
     res.json({
       success: true,
-      commands: 
-        
-        device.features.map((f) => ({
-        
-          featureId: f.featureId,
-          type: f.type,
-          desiredState: f.desiredState,
-          reportedState: f.reportedState,
-        })),
+      message: "Fan level updated",
+      feature,
     });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+export const getDeviceCommands = async (req, res) => {
+  try {
+    const device = req.device;
+    
+    const commands = device.features.map((f) => {
+      const cmd = {
+        featureId: f.featureId,
+        type: f.type,
+        gpio: f.gpio,
+        desiredState: f.desiredState,
+        reportedState: f.reportedState,
+      };
+    
+      if (f.type === "fan") {
+        cmd.desiredLevel = f.desiredLevel;
+        cmd.reportedLevel = f.reportedLevel;
+      }
+    
+      return cmd;
+    });
+    
+    
+    res.json({success: true, commands});
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -235,7 +339,7 @@ export const getDeviceCommands = async (req, res) => {
 export const reportDeviceState = async (req, res) => {
   try {
     const device = req.device;
-    const { featureId, state } = req.body;
+    const { featureId, state, level } = req.body;
 
     const feature = device.features.find(
       (f) => f.featureId === featureId
@@ -250,6 +354,17 @@ export const reportDeviceState = async (req, res) => {
 
     // ✅ device confirms reality
     feature.reportedState = state;
+
+    if (feature.type === "fan" && level !== undefined) {
+      if (level < 0 || level > 5) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid reported fan level",
+        });
+      }
+      feature.reportedLevel = level;
+    }
+    
     feature.lastUpdated = new Date();
 
     await device.save();
@@ -368,8 +483,8 @@ export const deleteDevice = async (req, res) => {
 export const updateDeviceFeatureMeta = async (req, res) => {
   try {
     const { id, featureId } = req.params;
-    const { name, type } = req.body;
-
+    const { name, type, gpio } = req.body;
+    
     const device = await Device.findOne({
       _id: id,
       owner: req.user._id,
@@ -396,6 +511,16 @@ export const updateDeviceFeatureMeta = async (req, res) => {
     }
 
     if (gpio !== undefined) {
+      const gpioUsed = device.features.some(
+        (f) => f.gpio === gpio && f.featureId !== featureId
+      );
+    
+      if (gpioUsed) {
+        return res.status(400).json({
+          success: false,
+          message: "GPIO already in use on this device",
+        });
+      }
       feature.gpio = gpio;
     }
     

@@ -169,6 +169,30 @@ export const updateFeatureMeta = async (deviceId, featureId, data) => {
   }
 };
 
+export const updateFeatureLevel = async (deviceId, featureId, level) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await axios.patch(
+      `${API_URL}/${deviceId}/features/${featureId}/level`,
+      { level },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (err) {
+    return {
+      success: false,
+      message:
+        err.response?.data?.message || "Failed to update fan level",
+    };
+  }
+};
+
 // 🗑️ Delete feature
 export const deleteFeature = async (deviceId, featureId) => {
   try {
