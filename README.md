@@ -36,6 +36,7 @@ backend/
 │   ├── utils/
 │   │   ├── ApiError.js
 │   │   ├── ApiResponse.js
+│   │   ├── deviceStatus.cron.js
 │   │   └── isDeviceOnline.js
 │   ├── config/
 │   │   └── db.js

@@ -1,13 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
-import { getUserDevices, createDevice } from "../services/device";
+import { 
+  getUserDevices, 
+  createDevice,
+  updateDevice, 
+  deleteDevice, 
+} from "../services/device";
 import Navbar from "../components/Navbar/Navbar";
 const Dashboard = () => {
   
   const [user, setUser] = useState(null);
   const [devices, setDevices] = useState([]);
-  
+  const [editingDeviceId, setEditingDeviceId] = useState(null);
+  const [editName, setEditName] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
     const init = async () => {
@@ -31,24 +37,81 @@ const Dashboard = () => {
   }, [navigate]);
   
   const handleAddDevice = async () => {
-  const name = prompt("Enter device name:");
-  if (!name) return;
-
-  const deviceId = prompt("Enter unique device ID:");
-  if (!deviceId) return;
-
-  const res = await createDevice({ name, deviceId });
-
-  if (res.success) {
-    alert("Device added successfully");
-    const deviceRes = await getUserDevices();
-    if (deviceRes.success) {
-      setDevices(deviceRes.devices);
+    const name = prompt("Enter device name:");
+    if (!name) return;
+  
+    const deviceId = prompt("Enter unique device ID:");
+    if (!deviceId) return;
+  
+    const res = await createDevice({ name, deviceId });
+  
+    if (res.success) {
+      alert("Device added successfully");
+      const deviceRes = await getUserDevices();
+      if (deviceRes.success) {
+        setDevices(deviceRes.devices);
+      }
+    } else {
+      alert(res.message || "Failed to add device");
     }
-  } else {
-    alert(res.message || "Failed to add device");
-  }
-};
+  };
+  
+  /*
+  const handleEditDevice = async (device) => {
+    const newName = prompt("Edit device name:", device.name);
+    if (!newName || newName === device.name) return;
+  
+    const res = await updateDevice(device._id, { name: newName });
+  
+    if (res.success) {
+      setDevices((prev) =>
+        prev.map((d) =>
+          d._id === device._id ? res.device : d
+        )
+      );
+    } else {
+      alert(res.message);
+    }
+  };
+  */
+  const handleDeleteDevice = async (deviceId) => {
+    const ok = window.confirm("Delete this device?");
+    if (!ok) return;
+  
+    const res = await deleteDevice(deviceId);
+  
+    if (res.success) {
+      setDevices((prev) => prev.filter((d) => d._id !== deviceId));
+    } else {
+      alert(res.message);
+    }
+  };
+  
+  const startEditDevice = (device) => {
+    setEditingDeviceId(device._id);
+    setEditName(device.name);
+  };
+  
+  const saveEditDevice = async (deviceId) => {
+    if (!editName.trim()) return alert("Name cannot be empty");
+  
+    const res = await updateDevice(deviceId, { name: editName });
+  
+    if (res.success) {
+      setDevices((prev) =>
+        prev.map((d) => (d._id === deviceId ? res.device : d))
+      );
+      setEditingDeviceId(null);
+      setEditName("");
+    } else {
+      alert(res.message);
+    }
+  };
+  
+  const cancelEdit = () => {
+    setEditingDeviceId(null);
+    setEditName("");
+  };
 
   if (!user) {
     return <p>Loading...</p>;
@@ -78,11 +141,58 @@ const Dashboard = () => {
         >
           ➕ Add Device
         </button>
-        <ul>
+        <ul style={{ listStyle: "none", padding: 0 }}>
           {devices.map((device) => (
-            <li key={device._id} style={{ margin: "0.5rem 0" }}
-              onClick={() => navigate(`/device/${device._id}`)}>
-              <strong>{device.name}</strong> — {device.deviceId}
+            <li
+              key={device._id}
+              style={{
+                marginBottom: "1rem",
+                padding: "0.75rem",
+                border: "1px solid #ddd",
+                borderRadius: "6px",
+              }}
+            >
+              {/* 🔹 Device row */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  onClick={() => navigate(`/device/${device._id}`)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <strong>{device.name}</strong> — {device.deviceId}
+                </div>
+        
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button onClick={() => startEditDevice(device)}>✏️</button>
+                  <button onClick={() => handleDeleteDevice(device._id)}>🗑️</button>
+                </div>
+              </div>
+        
+              {/* 🔽 Inline edit form */}
+              {editingDeviceId === device._id && (
+                <div
+                  style={{
+                    marginTop: "0.75rem",
+                    display: "flex",
+                    gap: "0.5rem",
+                  }}
+                >
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    style={{ flex: 1, padding: "6px" }}
+                  />
+        
+                  <button onClick={() => saveEditDevice(device._id)}>Save</button>
+                  <button onClick={cancelEdit}>Cancel</button>
+                </div>
+              )}
             </li>
           ))}
         </ul>
