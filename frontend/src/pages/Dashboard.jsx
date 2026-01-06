@@ -6,7 +6,7 @@ import {
   createDevice,
   updateDevice, 
   deleteDevice, 
-} from "../services/device";
+} from "../services/deviceService";
 import Navbar from "../components/Navbar/Navbar";
 const Dashboard = () => {
   
@@ -56,24 +56,6 @@ const Dashboard = () => {
     }
   };
   
-  /*
-  const handleEditDevice = async (device) => {
-    const newName = prompt("Edit device name:", device.name);
-    if (!newName || newName === device.name) return;
-  
-    const res = await updateDevice(device._id, { name: newName });
-  
-    if (res.success) {
-      setDevices((prev) =>
-        prev.map((d) =>
-          d._id === device._id ? res.device : d
-        )
-      );
-    } else {
-      alert(res.message);
-    }
-  };
-  */
   const handleDeleteDevice = async (deviceId) => {
     const ok = window.confirm("Delete this device?");
     if (!ok) return;
@@ -87,9 +69,9 @@ const Dashboard = () => {
     }
   };
   
-  const startEditDevice = (device) => {
-    setEditingDeviceId(device._id);
-    setEditName(device.name);
+  const startEditDevice = (item) => {
+    setEditingDeviceId(item._id);
+    setEditName(item.name);
   };
   
   const saveEditDevice = async (deviceId) => {
@@ -141,14 +123,19 @@ const Dashboard = () => {
         >
           ➕ Add Device
         </button>
-        <ul style={{ listStyle: "none", padding: 0 }}>
-          {devices.map((device) => (
+        <ul 
+          style={{ 
+            listStyle: "none", 
+            padding: 0,
+            
+          }}>
+          {devices.map((item) => (
             <li
-              key={device._id}
+              key={item._id}
               style={{
-                marginBottom: "1rem",
+                margin: ".5rem 1rem",
                 padding: "0.75rem",
-                border: "1px solid #ddd",
+                border: "1px solid #aaa",
                 borderRadius: "6px",
               }}
             >
@@ -156,25 +143,51 @@ const Dashboard = () => {
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "space-between",
+                  justifyContent: "space-evenly",
                   alignItems: "center",
                 }}
               >
                 <div
-                  onClick={() => navigate(`/device/${device._id}`)}
-                  style={{ cursor: "pointer" }}
-                >
-                  <strong>{device.name}</strong> — {device.deviceId}
+                  onClick={() => navigate(`/device/${item._id}`)}
+                  style={{ 
+                    display:"flex",
+                    justifyContent: "space-between",
+                    cursor: "pointer",
+                    width:"100%",
+                    padding: ".5rem"
+                  }}>
+                  <div
+                    style={{ 
+                      display:"flex",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                      padding: ".5rem",
+                      width:"50%"
+                    }}>
+                    <strong>Device Id:-{item.deviceId}
+                    </strong>
+                  </div>
+                  <div
+                    style={{ 
+                    display:"flex",
+                    justifyContent: "space-between",
+                    cursor: "pointer",
+                    padding: ".5rem",
+                    width:"50%"
+                  }}>
+                    <strong >Name:
+                    </strong> {item.name}
+                  </div>
                 </div>
         
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button onClick={() => startEditDevice(device)}>✏️</button>
-                  <button onClick={() => handleDeleteDevice(device._id)}>🗑️</button>
+                  <button onClick={() => startEditDevice(item)}>✏️</button>
+                  <button onClick={() => handleDeleteDevice(item._id)}>🗑️</button>
                 </div>
               </div>
         
               {/* 🔽 Inline edit form */}
-              {editingDeviceId === device._id && (
+              {editingDeviceId === item._id && (
                 <div
                   style={{
                     marginTop: "0.75rem",
@@ -189,7 +202,7 @@ const Dashboard = () => {
                     style={{ flex: 1, padding: "6px" }}
                   />
         
-                  <button onClick={() => saveEditDevice(device._id)}>Save</button>
+                  <button onClick={() => saveEditDevice(item._id)}>Save</button>
                   <button onClick={cancelEdit}>Cancel</button>
                 </div>
               )}

@@ -93,18 +93,6 @@ export const addDeviceFeature = async (req, res) => {
   try {
     const { id } = req.params;
     const { featureId, name, type } = req.body;
-    
-    //check existing featureId for same device
-    const exists = device.features.some(
-      (f) => f.featureId === featureId
-    );
-    
-    if (exists) {
-      return res.status(400).json({
-        success: false,
-        message: "FeatureId must be unique per device",
-      });
-    }
 
     const device = await Device.findOne({
       _id: id,
@@ -118,11 +106,25 @@ export const addDeviceFeature = async (req, res) => {
       });
     }
 
+    // ✅ NOW it is safe to check
+    const exists = device.features.some(
+      (f) => f.featureId === featureId
+    );
+
+    if (exists) {
+      return res.status(400).json({
+        success: false,
+        message: "FeatureId must be unique per device",
+      });
+    }
+
     device.features.push({
       featureId,
       name,
       type,
-      state: false,
+      desiredState: false,
+      reportedState: false,
+      lastUpdated: new Date(),
     });
 
     await device.save();
