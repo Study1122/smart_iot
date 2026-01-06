@@ -15,12 +15,12 @@ int levelToPwm(int level) {
   return map(level, 1, 5, 200, PWM_MAX);
 }
 
-const char* ssid = "ESP8266";
-const char* password = "12345678";
+const char* ssid = "wifi_ssid_name";
+const char* password = "your_wifi_password";
 
-const char* serverUrl = "http://10.87.22.179:5000";
-const char* deviceId = "arduino-nano";
-const char* deviceSecret = "d403c312c4a78025f8a3e136eb281a98";
+const char* serverUrl = "http://<bavkend_ip>:5000";
+const char* deviceId = "<deviceId>";
+const char* deviceSecret = "<deviceSecret>";
 
 /* ================== GLOBALS ================== */
 
