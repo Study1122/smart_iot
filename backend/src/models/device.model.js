@@ -66,6 +66,10 @@ const deviceSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        gpio: {
+          type: Number,
+          default: null, // important for backward compatibility
+        }
       },
     ],
   },

@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import Navbar from "../components/Navbar/Navbar";
+import { getMe } from "../services/auth";
+import { GPIO_PINS } from "../constants/gpioPins";
 import {
   getDeviceById,
   toggleFeature,
@@ -7,8 +10,6 @@ import {
   updateFeatureMeta,
   deleteFeature,
 } from "../services/deviceService";
-import Navbar from "../components/Navbar/Navbar";
-import { getMe } from "../services/auth";
 
 const DeviceDetails = () => {
   const { id } = useParams();
@@ -250,6 +251,23 @@ const DeviceDetails = () => {
                 setNewFeature({ ...newFeature, featureId: e.target.value })
               }
             />
+            
+            <select
+              value={newFeature.gpio ?? ""}
+              onChange={(e) =>
+                setNewFeature({
+                  ...newFeature,
+                  gpio: Number(e.target.value),
+                })
+              }
+            >
+              <option value="">Select GPIO</option>
+              {GPIO_PINS.map((pin) => (
+                <option key={pin.value} value={pin.value}>
+                  {pin.label}
+                </option>
+              ))}
+            </select>
             <input
               placeholder="Name"
               value={newFeature.name}
@@ -373,6 +391,7 @@ const DeviceDetails = () => {
                     style={{
                       marginTop: ".75rem",
                       display: "flex",
+                      flexWrap: "wrap",
                       gap: ".5rem",
                     }}
                   >
@@ -385,6 +404,24 @@ const DeviceDetails = () => {
                         })
                       }
                     />
+                    
+                    <select
+                      value={newFeature.gpio ?? ""}
+                      onChange={(e) =>
+                        setNewFeature({
+                          ...newFeature,
+                          gpio: Number(e.target.value),
+                        })
+                      }
+                    >
+                      <option value="">Select GPIO</option>
+                      {GPIO_PINS.map((pin) => (
+                        <option key={pin.value} value={pin.value}>
+                          {pin.label}
+                        </option>
+                      ))}
+                    </select>
+                    
                     <select
                       value={editFeatureData.type}
                       onChange={(e) =>

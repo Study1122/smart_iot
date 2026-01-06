@@ -117,6 +117,22 @@ export const addDeviceFeature = async (req, res) => {
         message: "FeatureId must be unique per device",
       });
     }
+    
+    //GPIO pin features
+    const allowedGpios = [0, 2, 4, 5, 12, 13, 14, 15, 16];
+
+    if (gpio !== undefined && !allowedGpios.includes(gpio)) {
+      throw new ApiError(400, "Invalid GPIO pin");
+    }
+    
+    // prevent duplicate GPIO per device
+    const gpioUsed = device.features.some(
+      (f) => f.gpio === gpio && gpio !== null
+    );
+    
+    if (gpioUsed) {
+      throw new ApiError(400, "GPIO already in use on this device");
+    }
 
     device.features.push({
       featureId,
@@ -124,6 +140,7 @@ export const addDeviceFeature = async (req, res) => {
       type,
       desiredState: false,
       reportedState: false,
+      gpio,
       lastUpdated: new Date(),
     });
 
@@ -364,11 +381,13 @@ export const updateDeviceFeatureMeta = async (req, res) => {
         message: "Device not found",
       });
     }
+    
 
     const feature = device.features.find(
       (f) => f.featureId === featureId
     );
 
+    
     if (!feature) {
       return res.status(404).json({
         success: false,
@@ -376,6 +395,10 @@ export const updateDeviceFeatureMeta = async (req, res) => {
       });
     }
 
+    if (gpio !== undefined) {
+      feature.gpio = gpio;
+    }
+    
     if (name) feature.name = name;
     if (type) feature.type = type;
 
