@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
+import { timeAgo } from "../services/timeAgo";
 import { 
   getUserDevices, 
   createDevice,
   updateDevice, 
   deleteDevice, 
 } from "../services/deviceService";
+
 import Navbar from "../components/Navbar/Navbar";
 const Dashboard = () => {
   
@@ -18,7 +20,7 @@ const Dashboard = () => {
   
   
   useEffect(() => {
-    let interval;
+    let intervalId;
     const init = async () => {
       const res = await getMe();
       
@@ -37,8 +39,8 @@ const Dashboard = () => {
       }
     };
     init();
-    interval = setInterval(init, 5000); // 🔄 refresh status every
-    return () => clearInterval(interval);
+    intervalId = setInterval(init, 5000); // 🔄 refresh status every
+    return () => clearInterval(intervalId);
   }, [navigate]);
   
   const handleAddDevice = async () => {
@@ -209,8 +211,7 @@ const Dashboard = () => {
                           fontSize: 12,
                           fontWeight: 600,
                           color: item.status === "online" ? "#16a34a" : "#dc2626",
-                        }}
-                      >
+                        }}>
                         {item.status === "online" ? "🟢 Online" : "🔴 Offline"}
                       </span>
                     </div>
@@ -219,10 +220,9 @@ const Dashboard = () => {
                       style={{
                         pending: "1rem",
                         display: "flex",
-                        
                         justifyContent:"center",
                         flexDirection: "column",
-                        fontSize: 13,
+                        fontSize: 10,
                         width: "30%",
                         border: "2px solid purple", 
                         flexWrap: "wrap",
@@ -243,9 +243,13 @@ const Dashboard = () => {
                         alignItems:  "center",
                         width:"30%",
                       }}>
-                      <span style={{ fontSize: 12, color: "#666" }}>
-                        Last seen: {item.lastSeen || "Never"}
-                      </span>
+                      <div 
+                        style={{ 
+                          fontSize: "12px", 
+                          color: "#6b7280",
+                        }}>
+                        <span>Last seen: <br></br> {timeAgo(item.lastSeen)}</span>
+                      </div>
                     </div>
                 </div>
                 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import { getMe } from "../services/auth";
 import { GPIO_PINS, getGpioByValue } from "../constants/gpioPins";
+import { timeAgo } from "../services/timeAgo";
 import {
   getDeviceById,
   toggleFeature,
@@ -73,7 +74,9 @@ const DeviceDetails = () => {
           : f
       ),
     }));
-  
+    
+    const prevLevel = feature.desiredLevel;
+    
     const res = await updateFeatureLevel(
       currentDevice._id,
       feature.featureId,
@@ -81,6 +84,14 @@ const DeviceDetails = () => {
     );
   
     if (!res.success) {
+      setCurrentDevice(prev => ({
+        ...prev,
+        features: prev.features.map(f =>
+          f.featureId === feature.featureId
+            ? { ...f, desiredLevel: prevLevel }
+            : f
+        )
+      }));
       alert(res.message);
     }
   };
@@ -229,7 +240,13 @@ const DeviceDetails = () => {
                 {currentDevice.status}
               </span>
             </div>
-            <div>Last Seen: {currentDevice.lastSeen || "Never"}</div>
+            {/* LAST SEEN */}
+            <div>
+              Last Seen:{" "}
+              <strong>
+                {timeAgo(currentDevice.lastSeen)}
+              </strong>
+            </div>
           </div>
         </div>
         
@@ -444,6 +461,7 @@ const DeviceDetails = () => {
                         setEditFeatureData({
                           ...editFeatureData,
                           name: e.target.value,
+                          gpio: null,
                         })
                       }
                     />
