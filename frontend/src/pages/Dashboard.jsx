@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
 import { timeAgo } from "../services/timeAgo";
+import { COLORS } from "../constants/colors";
+
 import { 
   getUserDevices, 
   createDevice,
@@ -123,105 +125,146 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* ✅ NAVBAR */}
       <Navbar user={user} />
-      
-      {/* ✅ DEVICE LISTS */}
-      <div style={{ maxWidth: "700px", margin: "2rem auto" }}>
-        <h1>Dashboard</h1>
-
-        <h3 style={{ marginTop: "1rem" }}>Your Devices</h3>
-
-        {devices.length === 0 && <p>No devices registered yet.</p>}
+  
+      <div
+        style={{
+          maxWidth: 720,
+          margin: "2rem auto",
+          padding: "0 1rem",
+        }}
+      >
+        <h1 style={{ marginBottom: "0.25rem", color: COLORS.textPrimary }}>
+          Dashboard
+        </h1>
+        <p style={{ color: COLORS.textSecondary, marginBottom: "1rem" }}>
+          Your Devices
+        </p>
+  
         <button
           onClick={handleAddDevice}
           style={{
-            marginBottom: "1rem",
-            padding: "8px 12px",
-            borderRadius: "6px",
+            marginBottom: "1.25rem",
+            padding: "0.6rem 1rem",
+            borderRadius: 8,
             border: "none",
+            background: COLORS.primaryLight,
+            color: COLORS.textInverse,
+            fontWeight: 600,
             cursor: "pointer",
           }}
         >
           ➕ Add Device
         </button>
-        <ul 
-          style={{ 
-            listStyle: "none", 
-            padding: 0,
-          }}>
-          
+  
+        {devices.length === 0 && (
+          <p style={{ color: COLORS.textSecondary }}>
+            No devices registered yet.
+          </p>
+        )}
+  
+        <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "1rem" }}>
           {devices.map((item) => {
             const { total, on, pending } = getDeviceStats(item);
             const isOffline = item.status !== "online";
-          
+  
             return (
               <li
                 key={item._id}
                 style={{
-                  margin: "0.75rem 0",
                   padding: "1rem",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "12px",
-                  background: isOffline ? "#f9fafb" : "#fff",
+                  borderRadius: 14,
+                  background: COLORS.bgCard,
+                  border: `1px solid ${COLORS.borderLight}`,
+                  boxShadow: isOffline
+                    ? COLORS.shadowSoft
+                    : COLORS.shadowMedium,
                   opacity: isOffline ? 0.6 : 1,
                 }}
               >
-                {/* DEVICE MAIN INFO */}
+                {/* MAIN CLICK AREA */}
                 <div
                   onClick={() =>
-                    item.status === "online" && navigate(`/device/${item._id}`)
+                    item.status === "online" &&
+                    navigate(`/device/${item._id}`)
                   }
                   style={{
                     cursor: item.status === "online" ? "pointer" : "default",
                   }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                  {/* HEADER */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
                     <div>
-                      <strong style={{ fontSize: 16 }}>{item.name}</strong>
-                      <div style={{ fontSize: 12, color: "#6b7280" }}>
+                      <strong style={{ fontSize: 16, color: COLORS.textPrimary }}>
+                        {item.name}
+                      </strong>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: COLORS.textSecondary,
+                        }}
+                      >
                         ID: {item.deviceId}
                       </div>
                     </div>
-          
+  
                     <span
                       style={{
                         fontSize: 12,
                         fontWeight: 600,
-                        color: item.status === "online" ? "#16a34a" : "#dc2626",
+                        color:
+                          item.status === "online"
+                            ? COLORS.success
+                            : COLORS.error,
                       }}
                     >
                       {item.status === "online" ? "🟢 Online" : "🔴 Offline"}
                     </span>
                   </div>
-          
+  
                   {/* STATS */}
                   <div
                     style={{
                       display: "flex",
                       gap: "1rem",
-                      marginTop: "0.5rem",
+                      marginTop: "0.6rem",
                       fontSize: 13,
-                      color: "#374151",
+                      color: COLORS.textSecondary,
                     }}
                   >
                     <span>⚙️ {total} Features</span>
                     <span>🟢 {on} ON</span>
-                    {pending > 0 && <span>⏳ {pending} Syncing...</span>}
+                    {pending > 0 && (
+                      <span style={{ color: COLORS.warning }}>
+                        ⏳ {pending} Syncing
+                      </span>
+                    )}
                   </div>
-          
+  
                   {/* LAST SEEN */}
-                  <div style={{ marginTop: "0.4rem", fontSize: 12, color: "#6b7280" }}>
+                  <div
+                    style={{
+                      marginTop: "0.4rem",
+                      fontSize: 12,
+                      color: COLORS.textSecondary,
+                    }}
+                  >
                     Last seen: {timeAgo(item.lastSeen)}
                   </div>
                 </div>
-          
+  
                 {/* ACTIONS */}
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "flex-end",
-                    gap: "0.75rem",
+                    gap: "0.5rem",
                     marginTop: "0.75rem",
                   }}
                 >
@@ -230,22 +273,25 @@ const Dashboard = () => {
                       e.stopPropagation();
                       startEditDevice(item);
                     }}
-                    style={{ padding: "6px 10px" }}
+                    style={iconButton}
                   >
                     ✏️
                   </button>
-          
+  
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteDevice(item._id);
                     }}
-                    style={{ padding: "6px 10px" }}
+                    style={{
+                      ...iconButton,
+                      color: COLORS.error,
+                    }}
                   >
                     🗑️
                   </button>
                 </div>
-          
+  
                 {/* INLINE EDIT */}
                 {editingDeviceId === item._id && (
                   <div
@@ -259,10 +305,19 @@ const Dashboard = () => {
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      style={{ flex: 1, padding: "6px" }}
+                      style={{
+                        flex: 1,
+                        padding: "0.45rem",
+                        borderRadius: 6,
+                        border: `1px solid ${COLORS.borderLight}`,
+                      }}
                     />
-                    <button onClick={() => saveEditDevice(item._id)}>Save</button>
-                    <button onClick={cancelEdit}>Cancel</button>
+                    <button style={primaryBtn} onClick={() => saveEditDevice(item._id)}>
+                      Save
+                    </button>
+                    <button style={ghostBtn} onClick={cancelEdit}>
+                      Cancel
+                    </button>
                   </div>
                 )}
               </li>
@@ -271,7 +326,31 @@ const Dashboard = () => {
         </ul>
       </div>
     </>
-  )
+  );
+};
+
+const iconButton = {
+  padding: "6px 10px",
+  borderRadius: 8,
+  border: `1px solid ${COLORS.borderDark}`,
+  background: COLORS.bgCard,
+  cursor: "pointer",
+};
+
+const primaryBtn = {
+  padding: "6px 12px",
+  borderRadius: 8,
+  border: "none",
+  background: COLORS.primary,
+  color: COLORS.textInverse,
+  fontWeight: 600,
+};
+
+const ghostBtn = {
+  padding: "6px 12px",
+  borderRadius: 8,
+  border: `1px solid ${COLORS.borderLight}`,
+  background: "transparent",
 };
 
 export default Dashboard;

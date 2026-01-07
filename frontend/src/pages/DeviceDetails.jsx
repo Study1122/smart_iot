@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import { getMe } from "../services/auth";
-import { GPIO_PINS, getGpioByValue } from "../constants/gpioPins";
+import { COLORS } from "../constants/colors";
 import { timeAgo } from "../services/timeAgo";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { GPIO_PINS, 
+         getGpioByValue 
+} from "../constants/gpioPins";
 import {
   getDeviceById,
   toggleFeature,
@@ -13,20 +16,20 @@ import {
   deleteFeature,
 } from "../services/deviceService";
 
-
 const ToggleSwitch = ({ checked, disabled, onChange }) => {
   return (
     <div
       onClick={() => !disabled && onChange()}
       style={{
-        width: 42,
-        height: 22,
+        width: 54,
+        height: 28,
+        border: `3px solid ${COLORS.borderDark}`,
         borderRadius: 999,
-        background: checked ? "#16a34a" : "#e5e7eb",
+        background: checked ? COLORS.success : COLORS.error,
         position: "relative",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
-        transition: "background 0.2s",
+        transition: "background .5s",
       }}
     >
       <div
@@ -37,8 +40,8 @@ const ToggleSwitch = ({ checked, disabled, onChange }) => {
           background: "#fff",
           position: "absolute",
           top: 2,
-          left: checked ? 22 : 2,
-          transition: "left 0.2s",
+          left: checked ? 27 : 3,
+          transition: "left .5s",
           boxShadow: "0 1px 3px rgba(0,0,0,0.3)",
         }}
       />
@@ -309,7 +312,13 @@ const DeviceDetails = () => {
           }}
         >
           <h3>Features</h3>
-          <button onClick={() => setShowAddFeature((v) => !v)}>
+          <button 
+            style={{
+              padding: ".5rem",
+              border: "none",
+              background : "red",
+            }}
+            onClick={() => setShowAddFeature((v) => !v)}>
             ➕ Add Feature
           </button>
         </div>
@@ -318,16 +327,17 @@ const DeviceDetails = () => {
         {showAddFeature && (
           <div
             style={{
-              border: "1px dashed #cbd5f5",
-              borderRadius: 10,
-              padding: "1rem",
-              marginBottom: "1rem",
+              margin: "0px, 0px",
+              padding: 12,
+              borderRadius: 8,
+              background: "rgba(180, 255, 254, .3)",
+              border: "2px dotted rgba(50, 255, 254, .3)",
               display: "flex",
               flexWrap: "wrap",
-              gap: ".5rem",
+              gap: "0.5rem",
             }}
           >
-            <input
+            <input style={inputStyle}
               placeholder="Feature ID (unique)"
               value={newFeature.featureId}
               onChange={(e) =>
@@ -335,7 +345,7 @@ const DeviceDetails = () => {
               }
             />
             
-            <select
+            <select style={selectStyle}
               value={newFeature.gpio ?? ""}
               onChange={(e) =>
                 setNewFeature({
@@ -358,14 +368,14 @@ const DeviceDetails = () => {
                 ))
               }
             </select>
-            <input
+            <input style={inputStyle}
               placeholder="Name"
               value={newFeature.name}
               onChange={(e) =>
                 setNewFeature({ ...newFeature, name: e.target.value })
               }
             />
-            <select
+            <select style={selectStyle}
               value={newFeature.type}
               onChange={(e) =>
                 setNewFeature({ ...newFeature, type: e.target.value })
@@ -375,8 +385,12 @@ const DeviceDetails = () => {
               <option value="fan">Fan</option>
               <option value="switch">Switch</option>
             </select>
-            <button onClick={handleAddFeature}>Save</button>
-            <button onClick={() => setShowAddFeature(false)}>Cancel</button>
+            <button style={iconButton}
+              onClick={handleAddFeature}>Save</button>
+            <button style={{...ghostBtn, 
+              backgroundColor: COLORS.error
+            }}
+            onClick={() => setShowAddFeature(false)}>Cancel</button>
           </div>
         )}
 
@@ -393,7 +407,7 @@ const DeviceDetails = () => {
                   border: "1px solid #e5e7eb",
                   borderRadius: 12,
                   border: feature.reportedState ? ".1rem solid rgba(14, 194, 89, 0.5)" : ".1rem solid rgba(192, 200, 191, 0.76)" ,
-                  boxShadow: feature.reportedState ? "0px 0px 10px rgba(26, 247, 118, 0.5)" : "0px 0px 10px rgba(160, 167, 159, 0.83)",
+                  boxShadow: feature.reportedState ? COLORS.shadowActive : COLORS.shadowInactive,
                   padding: "1rem",
                   opacity: isDeviceOffline ? 0.6 : 1,
                   background: isDeviceOffline ? "#f9fafb" : "#fff",
@@ -491,13 +505,20 @@ const DeviceDetails = () => {
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "flex-end",
+                    justifyContent: "space-between",
                     gap: "0.75rem",
                     marginTop: 12,
                   }}
                 >
-                  <button onClick={() => startEditFeature(feature)}>✏️ Edit</button>
-                  <button onClick={() => handleDeleteFeature(feature.featureId)}>🗑️</button>
+                  <button
+                    style={ iconButton }
+                    onClick={() => startEditFeature(feature)}>✏️ Edit</button>
+                  <button 
+                    style={{
+                      ...ghostBtn,
+                      backgroundColor: COLORS.error,
+                    }}
+                    onClick={() => handleDeleteFeature(feature.featureId)}>🗑️</button>
                 </div>
               
                 {/* ---------- EDIT MODE ---------- */}
@@ -514,7 +535,7 @@ const DeviceDetails = () => {
                       gap: "0.5rem",
                     }}
                   >
-                    <input
+                    <input style={inputStyle}
                       value={editFeatureData.name}
                       onChange={(e) =>
                         setEditFeatureData((prev) => ({
@@ -525,7 +546,7 @@ const DeviceDetails = () => {
                       placeholder="Feature name"
                     />
                 
-                    <select
+                    <select style={selectStyle}
                       value={editFeatureData.gpio ?? ""}
                       onChange={(e) =>
                         setEditFeatureData((prev) => ({
@@ -536,7 +557,7 @@ const DeviceDetails = () => {
                     >
                       <option value="">Select GPIO</option>
                       {GPIO_PINS.filter((pin) => {
-                        if (newFeature.type === "fan") {
+                        if (editFeatureData.type === "fan") {
                           return pin.type === "PWM";
                         }
                         return pin.type === "DIGITAL" || pin.type === "PWM";
@@ -548,7 +569,7 @@ const DeviceDetails = () => {
                       ))}
                     </select>
                 
-                    <select
+                    <select style = {selectStyle}
                       value={editFeatureData.type}
                       onChange={(e) =>
                         setEditFeatureData((prev) => ({
@@ -562,8 +583,12 @@ const DeviceDetails = () => {
                       <option value="switch">Switch</option>
                     </select>
                 
-                    <button onClick={() => saveEditFeature(feature.featureId)}>💾 Save</button>
-                    <button onClick={cancelEditFeature}>Cancel</button>
+                    <button 
+                    style={iconButton}
+                    onClick={() => saveEditFeature(feature.featureId)}>💾 Save & Update</button>
+                    <button
+                    style={{...ghostBtn, backgroundColor: COLORS.error}}
+                    onClick={cancelEditFeature}>Cancel</button>
                   </div>
                 )}
               </div>
@@ -574,5 +599,54 @@ const DeviceDetails = () => {
     </>
   );
 };
+
+const inputStyle = {
+  width: "100%",
+  padding: "0.55rem",
+  borderRadius: 8,
+  border: `1px solid ${COLORS.borderLight}`,
+  fontSize: 14,
+  outline: "none",
+};
+
+const selectStyle = {
+  ...inputStyle,
+  appearance: "none",          // removes default arrow
+  WebkitAppearance: "none",
+  MozAppearance: "none",
+  backgroundImage: `linear-gradient(45deg, transparent 50%, ${COLORS.textSecondary} 50%),
+                    linear-gradient(135deg, ${COLORS.textSecondary} 50%, transparent 50%)`,
+  backgroundPosition: "calc(100% - 18px) 55%, calc(100% - 13px) 55%",
+  backgroundSize: "5px 5px, 5px 5px",
+  backgroundRepeat: "no-repeat",
+  cursor: "pointer",
+};
+
+
+const iconButton = {
+  padding: "6px 10px",
+  borderRadius: 8,
+  color: COLORS.bgNavbar,
+  fontSize: 16,
+  border: `none`,
+  background: COLORS.primaryLight,
+  cursor: "pointer",
+};
+
+const primaryBtn = {
+  padding: "6px 12px",
+  borderRadius: 8,
+  border: "none",
+  background: COLORS.primary,
+  color: COLORS.textInverse,
+  fontWeight: 600,
+};
+
+const ghostBtn = {
+  padding: "6px 12px",
+  borderRadius: 8,
+  border: `1px solid ${COLORS.borderLight}`,
+};
+
 
 export default DeviceDetails;

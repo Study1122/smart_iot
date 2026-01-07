@@ -1,3 +1,29 @@
+:root {
+  /* BRAND */
+  --color-primary: #16a34a;
+  --color-secondary: #2563eb;
+  --color-accent: #f59e0b;
+
+  /* STATUS */
+  --color-success: #16a34a;
+  --color-error: #dc2626;
+  --color-warning: #f59e0b;
+
+  /* BACKGROUND */
+  --bg-page: #00c1d2;
+  --bg-card: #ffffff;
+  --bg-muted: #f1f5f9;
+
+  /* TEXT */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #6b7280;
+
+  /* BORDER */
+  --border-light: #e5e7eb;
+  --border-dark: #cbd5e1;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -7,7 +33,7 @@
 body {
   font-family: Arial, sans-serif;
   min-height: 100vh;      
-  background-color: #f4f4f9;
+  background-color: --bg-page;
   color: #333;
 }
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { login } from "../services/auth";
 import { useNavigate, Link } from "react-router-dom";
+import { COLORS } from "../constants/colors";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -14,55 +15,131 @@ const Login = () => {
     setMessage(res.message);
 
     if (res.success) {
-      // Save token in localStorage
       localStorage.setItem("token", res.token);
       navigate("/dashboard");
     }
   };
 
   return (
-    <div 
-      style={{ 
-        padding: "2rem", 
+    <div
+      style={{
+        minHeight: "100vh",
         display: "flex",
-        flexDirection: "column",
-        justfyContent: "center",
-        alignItems: "center"
-      }}>
-      <h1 style={{
-        textAlign:"center",
-        marginBottom: "1rem" 
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: COLORS.bgPage,
+        padding: "1rem",
       }}
-      >Login</h1>
-      <form
-        onSubmit={handleLogin}
-        style={{ display: "flex", flexDirection: "column", maxWidth: 300 }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 360,
+          padding: "2rem",
+          borderRadius: 16,
+          backgroundColor: COLORS.bgCard,
+          boxShadow: COLORS.shadowMedium,
+          border: `1px solid ${COLORS.borderLight}`,
+        }}
       >
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ marginBottom: "0.5rem", padding: "0.5rem" }}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ marginBottom: "0.5rem", padding: "0.5rem" }}
-        />
-        <button type="submit" style={{ padding: "0.5rem" }}>Login</button>
-      </form>
+        <h1
+          style={{
+            textAlign: "center",
+            marginBottom: "1.5rem",
+            color: COLORS.textPrimary,
+          }}
+        >
+          Welcome Back
+        </h1>
 
-      <p style={{ marginTop: "1rem" }}>
-        Don’t have an account? <Link to="/register">Register here</Link>
-      </p>
-      {message && <p style={{ marginTop: "1rem" }}>{message}</p>}
+        <form
+          onSubmit={handleLogin}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "0.75rem",
+          }}
+        >
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            style={inputStyle}
+          />
+
+          <button
+            type="submit"
+            style={{
+              marginTop: "0.5rem",
+              padding: "0.6rem",
+              borderRadius: 8,
+              border: "none",
+              backgroundColor: COLORS.primary,
+              color: COLORS.textInverse,
+              fontWeight: 600,
+              fontSize: 15,
+              cursor: "pointer",
+            }}
+          >
+            Login
+          </button>
+        </form>
+
+        <p
+          style={{
+            marginTop: "1rem",
+            fontSize: 14,
+            textAlign: "center",
+            color: COLORS.textSecondary,
+          }}
+        >
+          Don’t have an account?{" "}
+          <Link
+            to="/register"
+            style={{ color: COLORS.primary, fontWeight: 600 }}
+          >
+            Register here
+          </Link>
+        </p>
+
+        {message && (
+          <p
+            style={{
+              marginTop: "1rem",
+              fontSize: 13,
+              textAlign: "center",
+              color: COLORS.error,
+            }}
+          >
+            {message}
+          </p>
+        )}
+      </div>
     </div>
   );
+};
+
+/* =========================
+   Reusable input style
+========================= */
+const inputStyle = {
+  width: "100%",
+  padding: "0.55rem",
+  borderRadius: 8,
+  border: `1px solid ${COLORS.borderLight}`,
+  fontSize: 14,
+  outline: "none",
 };
 
 export default Login;
