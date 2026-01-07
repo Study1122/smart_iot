@@ -149,151 +149,124 @@ const Dashboard = () => {
           style={{ 
             listStyle: "none", 
             padding: 0,
-            
           }}>
           
           {devices.map((item) => {
             const { total, on, pending } = getDeviceStats(item);
+            const isOffline = item.status !== "online";
+          
             return (
               <li
                 key={item._id}
                 style={{
-                  margin: ".5rem 1rem",
-                  padding: "0.75rem",
-                  border: "1px solid #aaa",
-                  borderRadius: "6px",
-                }}>
-
-                {/* 🔹 Device row */}
+                  margin: "0.75rem 0",
+                  padding: "1rem",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "12px",
+                  background: isOffline ? "#f9fafb" : "#fff",
+                  opacity: isOffline ? 0.6 : 1,
+                }}
+              >
+                {/* DEVICE MAIN INFO */}
                 <div
+                  onClick={() =>
+                    item.status === "online" && navigate(`/device/${item._id}`)
+                  }
                   style={{
-                    display: "flex",
-                    justifyContent: "space-evenly",
-                    alignItems: "center",
-                    border: "2px solid brown",
-                  }}>
-                  {/* Device_Info_division */}
-                  <div
-                    onClick={() => item.status === "online" && navigate(`/device/${item._id}`)}
-                    style={{ 
-                      display:"flex",
-                      justifyContent: "space-between",
-                      cursor: "pointer",
-                      padding: ".2rem",
-                      border: "1px solid red",
-                      width:"100%",
-                      opacity:item.status !== "online"? 0.4 : 1,
-                      background: item.status !== "online" ? "#f9fafb" : "#fff",
-                    }}>
-                    <div 
-                      style={{
-                        border: "2px solid blue", 
-                        display:"flex",
-                        flexDirection: "column",
-                        width:"40%"
-                      }}>
-                      <strong>{item.name}</strong>
-                      <span style={{ fontSize: 13, color: "#555" }}>
-                        ID: {item.deviceId}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        border: "2px solid green", 
-                        display:"flex",
-                        flexDirection: "row",
-                        justifyContent: "center",
-                        alignItems:  "center",
-                        width:"20%"
-                      }}>
-                      <span
-                        style={{
-                          fontSize: 12,
-                          fontWeight: 600,
-                          color: item.status === "online" ? "#16a34a" : "#dc2626",
-                        }}>
-                        {item.status === "online" ? "🟢 Online" : "🔴 Offline"}
-                      </span>
-                    </div>
-                    
-                    <div
-                      style={{
-                        pending: "1rem",
-                        display: "flex",
-                        justifyContent:"center",
-                        flexDirection: "column",
-                        fontSize: 10,
-                        width: "30%",
-                        border: "2px solid purple", 
-                        flexWrap: "wrap",
-                      }}>
-                      <span> ⚙️ {total} Features</span>
-                      <span> 🟢 {on} ON </span>
-                    
-                      {pending > 0 && (
-                        <span>⏳ {pending} Pending</span>
-                      )}
-                    </div>
-                    
-                    <div
-                      style={{
-                        display: "flex",
-                        border: "2px solid pink", 
-                        justifyContent: "center",
-                        alignItems:  "center",
-                        width:"30%",
-                      }}>
-                      <div 
-                        style={{ 
-                          fontSize: "12px", 
-                          color: "#6b7280",
-                        }}>
-                        <span>Last seen: <br></br> {timeAgo(item.lastSeen)}</span>
-                      </div>
-                    </div>
-                </div>
-                
-                {/*  Device_edit_tool */}
-                <div 
-                  style={{ 
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.5rem",
-                    border: "1px solid red",
-                    
-                  }}>
-                  <button onClick={(e) => {
-                    e.stopPropagation()
-                    startEditDevice(item)
-                  }}>✏️</button>
-                  <button onClick={() => { 
-                    handleDeleteDevice(item._id)
-                  }}>🗑️</button>
-                </div>
-              </div>
-        
-              {/* 🔽 Inline edit form */}
-              {editingDeviceId === item._id && (
-                <div
-                  style={{
-                    marginTop: "0.75rem",
-                    display: "flex",
-                    gap: "0.5rem",
+                    cursor: item.status === "online" ? "pointer" : "default",
                   }}
                 >
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    style={{ flex: 1, padding: "6px" }}
-                  />
-        
-                  <button onClick={() => saveEditDevice(item._id)}>Save</button>
-                  <button onClick={cancelEdit}>Cancel</button>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}>
+                    <div>
+                      <strong style={{ fontSize: 16 }}>{item.name}</strong>
+                      <div style={{ fontSize: 12, color: "#6b7280" }}>
+                        ID: {item.deviceId}
+                      </div>
+                    </div>
+          
+                    <span
+                      style={{
+                        fontSize: 12,
+                        fontWeight: 600,
+                        color: item.status === "online" ? "#16a34a" : "#dc2626",
+                      }}
+                    >
+                      {item.status === "online" ? "🟢 Online" : "🔴 Offline"}
+                    </span>
+                  </div>
+          
+                  {/* STATS */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "1rem",
+                      marginTop: "0.5rem",
+                      fontSize: 13,
+                      color: "#374151",
+                    }}
+                  >
+                    <span>⚙️ {total}</span>
+                    <span>🟢 {on}</span>
+                    {pending > 0 && <span>⏳ {pending}</span>}
+                  </div>
+          
+                  {/* LAST SEEN */}
+                  <div style={{ marginTop: "0.4rem", fontSize: 12, color: "#6b7280" }}>
+                    Last seen: {timeAgo(item.lastSeen)}
+                  </div>
                 </div>
+          
+                {/* ACTIONS */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "0.75rem",
+                    marginTop: "0.75rem",
+                  }}
+                >
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEditDevice(item);
+                    }}
+                    style={{ padding: "6px 10px" }}
+                  >
+                    ✏️
+                  </button>
+          
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteDevice(item._id);
+                    }}
+                    style={{ padding: "6px 10px" }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+          
+                {/* INLINE EDIT */}
+                {editingDeviceId === item._id && (
+                  <div
+                    style={{
+                      marginTop: "0.75rem",
+                      display: "flex",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      style={{ flex: 1, padding: "6px" }}
+                    />
+                    <button onClick={() => saveEditDevice(item._id)}>Save</button>
+                    <button onClick={cancelEdit}>Cancel</button>
+                  </div>
                 )}
               </li>
-            )
+            );
           })}
         </ul>
       </div>
