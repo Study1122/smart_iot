@@ -15,7 +15,10 @@ const Dashboard = () => {
   const [editingDeviceId, setEditingDeviceId] = useState(null);
   const [editName, setEditName] = useState("");
   const navigate = useNavigate();
+  
+  
   useEffect(() => {
+    let interval;
     const init = async () => {
       const res = await getMe();
       
@@ -34,6 +37,8 @@ const Dashboard = () => {
       }
     };
     init();
+    interval = setInterval(init, 5000); // 🔄 refresh status every
+    return () => clearInterval(interval);
   }, [navigate]);
   
   const handleAddDevice = async () => {
@@ -54,6 +59,21 @@ const Dashboard = () => {
     } else {
       alert(res.message || "Failed to add device");
     }
+  };
+  
+  const getDeviceStats = (device) => {
+    const features = device.features || [];
+  
+    const total = features.length;
+    const on = features.filter(
+      (f) => f.reportedState === true
+    ).length;
+  
+    const pending = features.filter(
+      (f) => f.desiredState !== f.reportedState
+    ).length;
+  
+    return { total, on, pending };
   };
   
   const handleDeleteDevice = async (deviceId) => {
@@ -129,60 +149,122 @@ const Dashboard = () => {
             padding: 0,
             
           }}>
-          {devices.map((item) => (
-            <li
-              key={item._id}
-              style={{
-                margin: ".5rem 1rem",
-                padding: "0.75rem",
-                border: "1px solid #aaa",
-                borderRadius: "6px",
-              }}
-            >
-              {/* 🔹 Device row */}
-              <div
+          
+          {devices.map((item) => {
+            const { total, on, pending } = getDeviceStats(item);
+            return (
+              <li
+                key={item._id}
                 style={{
-                  display: "flex",
-                  justifyContent: "space-evenly",
-                  alignItems: "center",
-                }}
-              >
+                  margin: ".5rem 1rem",
+                  padding: "0.75rem",
+                  border: "1px solid #aaa",
+                  borderRadius: "6px",
+                }}>
+
+                {/* 🔹 Device row */}
                 <div
-                  onClick={() => navigate(`/device/${item._id}`)}
-                  style={{ 
-                    display:"flex",
-                    justifyContent: "space-between",
-                    cursor: "pointer",
-                    width:"100%",
-                    padding: ".5rem"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-evenly",
+                    alignItems: "center",
+                    border: "2px solid brown",
                   }}>
+                  {/* Device_Info_division */}
                   <div
+                    onClick={() => item.status === "online" && navigate(`/device/${item._id}`)}
                     style={{ 
                       display:"flex",
                       justifyContent: "space-between",
                       cursor: "pointer",
-                      padding: ".5rem",
-                      width:"50%"
+                      padding: ".2rem",
+                      border: "1px solid red",
+                      width:"100%",
+                      opacity:item.status !== "online"? 0.4 : 1,
+                      background: item.status !== "online" ? "#f9fafb" : "#fff",
                     }}>
-                    <strong>Device Id:-{item.deviceId}
-                    </strong>
-                  </div>
-                  <div
-                    style={{ 
-                    display:"flex",
-                    justifyContent: "space-between",
-                    cursor: "pointer",
-                    padding: ".5rem",
-                    width:"50%"
-                  }}>
-                    <strong >Name:
-                    </strong> {item.name}
-                  </div>
+                    <div 
+                      style={{
+                        border: "2px solid blue", 
+                        display:"flex",
+                        flexDirection: "column",
+                        width:"40%"
+                      }}>
+                      <strong>{item.name}</strong>
+                      <span style={{ fontSize: 13, color: "#555" }}>
+                        ID: {item.deviceId}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        border: "2px solid green", 
+                        display:"flex",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems:  "center",
+                        width:"20%"
+                      }}>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: item.status === "online" ? "#16a34a" : "#dc2626",
+                        }}
+                      >
+                        {item.status === "online" ? "🟢 Online" : "🔴 Offline"}
+                      </span>
+                    </div>
+                    
+                    <div
+                      style={{
+                        pending: "1rem",
+                        display: "flex",
+                        
+                        justifyContent:"center",
+                        flexDirection: "column",
+                        fontSize: 13,
+                        width: "30%",
+                        border: "2px solid purple", 
+                        flexWrap: "wrap",
+                      }}>
+                      <span> ⚙️ {total} Features</span>
+                      <span> 🟢 {on} ON </span>
+                    
+                      {pending > 0 && (
+                        <span>⏳ {pending} Pending</span>
+                      )}
+                    </div>
+                    
+                    <div
+                      style={{
+                        display: "flex",
+                        border: "2px solid pink", 
+                        justifyContent: "center",
+                        alignItems:  "center",
+                        width:"30%",
+                      }}>
+                      <span style={{ fontSize: 12, color: "#666" }}>
+                        Last seen: {item.lastSeen || "Never"}
+                      </span>
+                    </div>
                 </div>
-        
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button onClick={() => startEditDevice(item)}>✏️</button>
-                  <button onClick={() => handleDeleteDevice(item._id)}>🗑️</button>
+                
+                {/*  Device_edit_tool */}
+                <div 
+                  style={{ 
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.5rem",
+                    border: "1px solid red",
+                    
+                  }}>
+                  <button onClick={(e) => {
+                    e.stopPropagation()
+                    startEditDevice(item)
+                  }}>✏️</button>
+                  <button onClick={() => { 
+                    handleDeleteDevice(item._id)
+                  }}>🗑️</button>
                 </div>
               </div>
         
@@ -205,14 +287,14 @@ const Dashboard = () => {
                   <button onClick={() => saveEditDevice(item._id)}>Save</button>
                   <button onClick={cancelEdit}>Cancel</button>
                 </div>
-              )}
-            </li>
-          ))}
+                )}
+              </li>
+            )
+          })}
         </ul>
       </div>
     </>
-    
-  );
+  )
 };
 
 export default Dashboard;
