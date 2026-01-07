@@ -205,9 +205,9 @@ const Dashboard = () => {
                       color: "#374151",
                     }}
                   >
-                    <span>⚙️ {total}</span>
-                    <span>🟢 {on}</span>
-                    {pending > 0 && <span>⏳ {pending}</span>}
+                    <span>⚙️ {total} Features</span>
+                    <span>🟢 {on} ON</span>
+                    {pending > 0 && <span>⏳ {pending} Syncing...</span>}
                   </div>
           
                   {/* LAST SEEN */}
