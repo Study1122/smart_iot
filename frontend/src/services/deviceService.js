@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://10.87.22.179:5000/devices"; 
+const API_URL = import.meta.env.VITE_BACKEND_URL+"/devices"; 
 // ⚠️ use your backend IP (same as auth)
 
 //get all devices belonged to logged in user (useCase)

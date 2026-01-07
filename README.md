@@ -220,6 +220,3 @@ State              Meaning
  - This is not a demo dashboard.
  - It is a real IoT control system built with correct     synchronization, safety, and scalability principles.
  - If you’re reading this — you already built something serious. 🚀
-
-
-```

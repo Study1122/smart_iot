@@ -404,7 +404,6 @@ const DeviceDetails = () => {
               <div
                 key={feature.featureId}
                 style={{
-                  border: "1px solid #e5e7eb",
                   borderRadius: 12,
                   border: feature.reportedState ? ".1rem solid rgba(14, 194, 89, 0.5)" : ".1rem solid rgba(192, 200, 191, 0.76)" ,
                   boxShadow: feature.reportedState ? COLORS.shadowActive : COLORS.shadowInactive,
