@@ -382,10 +382,9 @@ const DeviceDetails = () => {
 
         {/*######  FEATURE LIST   #######*/}
         <div style={{ display: "grid", gap: "1rem" }}>
-          {currentDevice.features.map((feature) => {
+          { currentDevice.features.map((feature) => {
             const badge = getFeatureBadge(feature);
-            const isPending =
-              feature.desiredState !== feature.reportedState;
+            const isPending = feature.desiredState !== feature.reportedState;
 
             return ( 
               <div
@@ -393,6 +392,8 @@ const DeviceDetails = () => {
                 style={{
                   border: "1px solid #e5e7eb",
                   borderRadius: 12,
+                  border: feature.reportedState ? ".1rem solid rgba(14, 194, 89, 0.5)" : ".1rem solid rgba(192, 200, 191, 0.76)" ,
+                  boxShadow: feature.reportedState ? "0px 0px 10px rgba(26, 247, 118, 0.5)" : "0px 0px 10px rgba(160, 167, 159, 0.83)",
                   padding: "1rem",
                   opacity: isDeviceOffline ? 0.6 : 1,
                   background: isDeviceOffline ? "#f9fafb" : "#fff",
@@ -410,11 +411,12 @@ const DeviceDetails = () => {
               
                   <span
                     style={{
-                      padding: "2px 10px",
+                      padding: "5px 10px",
                       borderRadius: 999,
+                      textAlign: "center",
                       background: getFeatureBadge(feature).color,
                       color: "#fff",
-                      fontSize: 12,
+                      fontSize: 14,
                     }}
                   >
                     {getFeatureBadge(feature).text}
@@ -499,17 +501,69 @@ const DeviceDetails = () => {
                 </div>
               
                 {/* ---------- EDIT MODE ---------- */}
-                {editingFeatureId === feature.featureId && (
+                {editingFeatureId === feature.featureId&& (
                   <div
                     style={{
                       marginTop: 12,
                       padding: 12,
                       borderRadius: 8,
                       background: "#f8fafc",
-                      border: "1px solid #e5e7eb",
+                      border: "2px dotted #e5e7eb",
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "0.5rem",
                     }}
                   >
-                    {/* your existing edit form stays here unchanged */}
+                    <input
+                      value={editFeatureData.name}
+                      onChange={(e) =>
+                        setEditFeatureData((prev) => ({
+                          ...prev,
+                          name: e.target.value,
+                        }))
+                      }
+                      placeholder="Feature name"
+                    />
+                
+                    <select
+                      value={editFeatureData.gpio ?? ""}
+                      onChange={(e) =>
+                        setEditFeatureData((prev) => ({
+                          ...prev,
+                          gpio: Number(e.target.value),
+                        }))
+                      }
+                    >
+                      <option value="">Select GPIO</option>
+                      {GPIO_PINS
+                        .filter((pin) =>
+                          editFeatureData.type === "fan"
+                            ? pin.type === "PWM"
+                            : pin.type === "DIGITAL"
+                        )
+                        .map((pin) => (
+                          <option key={pin.value} value={pin.value}>
+                            {pin.label} — {pin.type}
+                          </option>
+                        ))}
+                    </select>
+                
+                    <select
+                      value={editFeatureData.type}
+                      onChange={(e) =>
+                        setEditFeatureData((prev) => ({
+                          ...prev,
+                          type: e.target.value,
+                        }))
+                      }
+                    >
+                      <option value="bulb">Bulb</option>
+                      <option value="fan">Fan</option>
+                      <option value="switch">Switch</option>
+                    </select>
+                
+                    <button onClick={() => saveEditFeature(feature.featureId)}>💾 Save</button>
+                    <button onClick={cancelEditFeature}>Cancel</button>
                   </div>
                 )}
               </div>
