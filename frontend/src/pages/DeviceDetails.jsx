@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar/Navbar";
 import { getMe } from "../services/auth";
-import { GPIO_PINS } from "../constants/gpioPins";
+import { GPIO_PINS, getGpioByValue } from "../constants/gpioPins";
 import {
   getDeviceById,
   toggleFeature,
@@ -30,6 +30,7 @@ const DeviceDetails = () => {
   const [editFeatureData, setEditFeatureData] = useState({
     name: "",
     type: "bulb",
+    gpio: null,
   });
 
   /* ---------------- TOGGLE FEATURE ---------------- */
@@ -113,6 +114,7 @@ const DeviceDetails = () => {
     setEditFeatureData({
       name: feature.name,
       type: feature.type,
+      gpio: feature.gpio,
     });
   };
 
@@ -127,7 +129,7 @@ const DeviceDetails = () => {
       setCurrentDevice((prev) => ({
         ...prev,
         features: prev.features.map((f) =>
-          f.featureId === featureId ? res.feature : f
+          f.featureId === featureId ? {...f, ...res.feature } : f
         ),
       }));
       setEditingFeatureId(null);
@@ -293,11 +295,18 @@ const DeviceDetails = () => {
               }
             >
               <option value="">Select GPIO</option>
-              {GPIO_PINS.map((pin) => (
-                <option key={pin.value} value={pin.value}>
-                  {pin.label}
-                </option>
-              ))}
+            
+              {GPIO_PINS
+                .filter((pin) =>
+                  newFeature.type === "fan"
+                    ? pin.type === "PWM"
+                    : pin.type === "DIGITAL"
+                )
+                .map((pin) => (
+                  <option key={pin.value} value={pin.value}>
+                    {pin.label} — {pin.type}
+                  </option>
+                ))}
             </select>
             <input
               placeholder="Name"
@@ -321,7 +330,7 @@ const DeviceDetails = () => {
           </div>
         )}
 
-        {/* FEATURE LIST */}
+        {/*######  FEATURE LIST   #######*/}
         <div style={{ display: "grid", gap: "1rem" }}>
           {currentDevice.features.map((feature) => {
             const badge = getFeatureBadge(feature);
@@ -346,12 +355,21 @@ const DeviceDetails = () => {
                     alignItems: "center",
                   }}
                 >
-                  <div>
-                    <strong>{feature.name}</strong>{" "}
-                    <span style={{ color: "#6b7280" }}>
-                      ({feature.type})
-                    </span>
-                  </div>
+                  <strong>{feature.name}</strong>{" "}
+                  <span style={{ color: "#6b7280" }}>
+                    ({feature.type})
+                  </span>
+                  
+                  {feature.gpio !== null && (
+                    <div style={{ fontSize: 12, color: "#6b7280", marginTop: 2 }}>
+                      {(() => {
+                        const pin = getGpioByValue(feature.gpio);
+                        return pin
+                          ? `${pin.label}  ${pin.type}`
+                          : `GPIO${feature.gpio}`;
+                      })()}
+                    </div>
+                  )}
 
                   <div style={{ display: "flex", gap: ".4rem" }}>
                     <span
@@ -389,7 +407,7 @@ const DeviceDetails = () => {
                   </div>
                 </div>
                 
-                {/* FAN SPEED SLIDER */}
+                {/*######   FAN SPEED SLIDER   #######*/}
                 {feature.type === "fan" && (
                   <div style={{ marginTop: ".75rem" }}>
                     <label style={{ fontSize: 13 }}>
@@ -409,7 +427,8 @@ const DeviceDetails = () => {
                     />
                   </div>
                 )}
-
+                
+                {/*######   EDIT FEATURE   #######*/}
                 {editingFeatureId === feature.featureId && (
                   <div
                     style={{
@@ -430,20 +449,27 @@ const DeviceDetails = () => {
                     />
                     
                     <select
-                      value={newFeature.gpio ?? ""}
+                      value={editFeatureData.gpio ?? ""}
                       onChange={(e) =>
-                        setNewFeature({
-                          ...newFeature,
+                        setEditFeatureData({
+                          ...editFeatureData,
                           gpio: Number(e.target.value),
                         })
                       }
                     >
                       <option value="">Select GPIO</option>
-                      {GPIO_PINS.map((pin) => (
-                        <option key={pin.value} value={pin.value}>
-                          {pin.label}
-                        </option>
-                      ))}
+                    
+                      {GPIO_PINS
+                        .filter((pin) =>
+                          editFeatureData.type === "fan"
+                            ? pin.type === "PWM"
+                            : pin.type === "DIGITAL"
+                        )
+                        .map((pin) => (
+                          <option key={pin.value} value={pin.value}>
+                            {pin.label} — {pin.type}
+                          </option>
+                        ))}
                     </select>
                     
                     <select

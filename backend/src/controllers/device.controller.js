@@ -2,7 +2,7 @@ import Device from "../models/device.model.js";
 import crypto from "crypto";
 
 /**
- * Register a new device (user action)
+ *  Register a new device (user action)
  */
 export const registerDevice = async (req, res) => {
   try {
@@ -59,7 +59,9 @@ export const getUserDevices = async (req, res) => {
   }
 };
 
-//Backend – Get single device by ID 📁 controller
+/**
+ * Backend – Get single device by ID 📁 controller
+*/
 export const getDeviceById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -88,7 +90,9 @@ export const getDeviceById = async (req, res) => {
   }
 };
 
-//add new features
+/**
+ * add new features
+ */
 export const addDeviceFeature = async (req, res) => {
   try {
     const { id } = req.params;
@@ -175,8 +179,9 @@ export const addDeviceFeature = async (req, res) => {
   }
 };
 
-
-// Toggle feature state (user action)
+/**
+ * Toggle feature state (user action)
+ */
 export const toggleDeviceFeature = async (req, res) => {
   try {
     const { id, featureId } = req.params;
@@ -232,7 +237,7 @@ export const toggleDeviceFeature = async (req, res) => {
 };
 
 /**
- * Update feature level (fan speed) – user action
+ * Update feature level (fan speed) – user action 
  */
 export const updateDeviceFeatureLevel = async (req, res) => {
   try {
@@ -380,8 +385,6 @@ export const reportDeviceState = async (req, res) => {
     });
   }
 };
-
-
 
 export const deviceHeartbeat = async (req, res) => {
   try {
