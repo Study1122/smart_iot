@@ -57,13 +57,13 @@ const DeviceDetails = () => {
   const [newFeature, setNewFeature] = useState({
     featureId: "",
     name: "",
-    type: "bulb",
+    type: "switch",
   });
 
   const [editingFeatureId, setEditingFeatureId] = useState(null);
   const [editFeatureData, setEditFeatureData] = useState({
     name: "",
-    type: "bulb",
+    type: "switch",
     gpio: null,
   });
 
@@ -346,17 +346,17 @@ const DeviceDetails = () => {
             >
               <option value="">Select GPIO</option>
             
-              {GPIO_PINS
-                .filter((pin) =>
-                  newFeature.type === "fan"
-                    ? pin.type === "PWM"
-                    : pin.type === "DIGITAL"
-                )
-                .map((pin) => (
-                  <option key={pin.value} value={pin.value}>
-                    {pin.label} — {pin.type}
-                  </option>
-                ))}
+              {GPIO_PINS.filter((pin) => {
+                if (newFeature.type === "fan") {
+                  return pin.type === "PWM";
+                }
+                return pin.type === "DIGITAL" || pin.type === "PWM";
+              }).map((pin) => (
+                <option key={pin.value} value={pin.value}>
+                  {pin.label} — {pin.type}
+                </option>
+                ))
+              }
             </select>
             <input
               placeholder="Name"
@@ -501,14 +501,14 @@ const DeviceDetails = () => {
                 </div>
               
                 {/* ---------- EDIT MODE ---------- */}
-                {editingFeatureId === feature.featureId&& (
+                {editingFeatureId===feature.featureId && (
                   <div
                     style={{
                       marginTop: 12,
                       padding: 12,
                       borderRadius: 8,
-                      background: "#f8fafc",
-                      border: "2px dotted #e5e7eb",
+                      background: "rgba(180, 255, 254, .3)",
+                      border: "2px dotted rgba(50, 255, 254, .3)",
                       display: "flex",
                       flexWrap: "wrap",
                       gap: "0.5rem",
@@ -535,17 +535,17 @@ const DeviceDetails = () => {
                       }
                     >
                       <option value="">Select GPIO</option>
-                      {GPIO_PINS
-                        .filter((pin) =>
-                          editFeatureData.type === "fan"
-                            ? pin.type === "PWM"
-                            : pin.type === "DIGITAL"
-                        )
-                        .map((pin) => (
-                          <option key={pin.value} value={pin.value}>
-                            {pin.label} — {pin.type}
-                          </option>
-                        ))}
+                      {GPIO_PINS.filter((pin) => {
+                        if (newFeature.type === "fan") {
+                          return pin.type === "PWM";
+                        }
+                        return pin.type === "DIGITAL" || pin.type === "PWM";
+                      })
+                      .map((pin) => (
+                        <option key={pin.value} value={pin.value}>
+                          {pin.label} — {pin.type}
+                        </option>
+                      ))}
                     </select>
                 
                     <select
