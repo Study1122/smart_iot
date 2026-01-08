@@ -5,7 +5,8 @@ import { timeAgo } from "../services/timeAgo";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GPIO_PINS, 
-         getGpioByValue 
+         getGpioByValue,
+         RESERVED_GPIO
 } from "../constants/gpioPins";
 import {
   LineChart,
@@ -585,6 +586,12 @@ const DeviceDetails = () => {
               <option value="">Select GPIO</option>
             
               {GPIO_PINS.filter((pin) => {
+              
+                // ❌ block telemetry pins
+                if (RESERVED_GPIO.telemetry.includes(pin.value)) {
+                  return false;
+                }
+                
                 if (newFeature.type === "fan") {
                   return pin.type === "PWM";
                 }

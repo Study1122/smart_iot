@@ -129,6 +129,15 @@ export const addDeviceFeature = async (req, res) => {
       });
     }
     
+    const RESERVED_TELEMETRY_GPIO = [4];
+
+    if (gpio && RESERVED_TELEMETRY_GPIO.includes(gpio)) {
+      return res.status(400).json({
+        success: false,
+        message: "GPIO reserved for telemetry sensor",
+      });
+    }
+    
     //GPIO pin features
     const allowedGpios = [0, 2, 4, 5, 12, 13, 14, 15, 16];
 
