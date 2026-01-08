@@ -40,7 +40,7 @@ const ToggleSwitch = ({ checked, disabled, onChange }) => {
         height: 28,
         border: `3px solid ${COLORS.borderDark}`,
         borderRadius: 999,
-        background: checked ? COLORS.success : COLORS.error,
+        background:checked ? COLORS.success : COLORS.error,
         position: "relative",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
@@ -286,8 +286,14 @@ const DeviceDetails = () => {
     <>
       <Navbar user={user} />
 
-      <div style={{ maxWidth: 900, margin: "2rem auto", padding: "0 1rem" }}>
-        {/* DEVICE HEADER */}
+      <div 
+        style={{ 
+          maxWidth: "900px", 
+          margin: "2rem auto",
+          padding: "0 1rem" ,
+          width:"100%",
+        }}>
+          {/* DEVICE HEADER */}
         <div
           style={{
             border: `.15rem solid ${COLORS.accentLight}`,
@@ -343,10 +349,10 @@ const DeviceDetails = () => {
         {latestTelemetry && (
           <div
             style={{
-              marginBottom: "1.25rem",
+              marginBottom: "1rem",
               padding: "1rem",
-              borderRadius: 10,
-              border: `2px solid ${COLORS.accent}`,
+              borderRadius: 12,
+              //border: `2px solid ${COLORS.accent}`,
               background: COLORS.bgPage,
               boxShadow: COLORS.shadowSoft,
             }}
@@ -358,7 +364,9 @@ const DeviceDetails = () => {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                gridTemplateColumns: window.innerWidth < 480
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(140px, 1fr))",
                 gap: "0.75rem",
                 fontSize: 14,
                 color: COLORS.textSecondary,
@@ -400,7 +408,13 @@ const DeviceDetails = () => {
               📈 Telemetry History
             </h3>
         
-            <div style={{ overflowX: "auto" }}>
+            {/* ✅ ONLY TABLE SCROLLS */}
+            <div
+              style={{
+                maxHeight: 250,
+                overflowY: "auto",
+              }}
+            >
               <table
                 style={{
                   width: "100%",
@@ -408,14 +422,22 @@ const DeviceDetails = () => {
                   fontSize: 13,
                 }}
               >
-                <thead>
-                  <tr style={{ background: COLORS.accentLight }}>
+                <thead
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    background: COLORS.accentLight,
+                    zIndex: 1,
+                  }}
+                >
+                  <tr>
                     <th style={thStyle}>Time</th>
                     <th style={thStyle}>Temp (°C)</th>
                     <th style={thStyle}>Humidity (%)</th>
                     <th style={thStyle}>Voltage (V)</th>
                   </tr>
                 </thead>
+        
                 <tbody>
                   {telemetryHistory.map((t) => (
                     <tr key={t._id}>
@@ -430,12 +452,12 @@ const DeviceDetails = () => {
             </div>
           </div>
         )}
-        
-        {/* ======== TELEMETRY CHARTS ======== */}
-        {chartData.length > 0 && (
+                
+        {/* ========= TELEMETRY CHART ========= */}
+        {telemetryHistory.length > 0 && (
           <div
             style={{
-              marginBottom: "2rem",
+              marginBottom: "1.5rem",
               padding: "1rem",
               borderRadius: 10,
               border: `2px solid ${COLORS.borderLight}`,
@@ -444,45 +466,58 @@ const DeviceDetails = () => {
             }}
           >
             <h3 style={{ marginBottom: "0.75rem", color: COLORS.textPrimary }}>
-              📊 Telemetry Trends
+              📊 Telemetry Chart
             </h3>
         
-            <div style={{ width: "100%", height: 280 }}>
-              <ResponsiveContainer>
-                <LineChart data={chartData}>
+            {/* ✅ MOBILE-SAFE FIXED HEIGHT */}
+            <div
+              style={{
+                height: 260,
+                width: "100%",
+                overflow: "hidden",
+                outline: "none",
+                WebkitTapHighlightColor: "transparent",
+              }}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={[...telemetryHistory].reverse()}
+                  margin={{ top: 10, right: 16, left: -10, bottom: 0 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
-                  
-                  <XAxis dataKey="time" />
-                  <YAxis />
-        
+                  <XAxis
+                    dataKey="createdAt"
+                    tickFormatter={(v) => timeAgo(v)}
+                    fontSize={10}
+                  />
+                  <YAxis fontSize={11} />
                   <Tooltip />
                   <Legend />
         
                   <Line
                     type="monotone"
                     dataKey="temperature"
-                    stroke="#ef4444"
-                    strokeWidth={2}
+                    stroke={COLORS.error}
                     dot={false}
-                    name="Temperature (°C)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
                   />
-        
                   <Line
                     type="monotone"
                     dataKey="humidity"
-                    stroke="#0ea5e9"
-                    strokeWidth={2}
+                    stroke={COLORS.info}
                     dot={false}
-                    name="Humidity (%)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
                   />
-        
                   <Line
                     type="monotone"
                     dataKey="voltage"
-                    stroke="#22c55e"
-                    strokeWidth={2}
+                    stroke={COLORS.success}
                     dot={false}
-                    name="Voltage (V)"
+                    strokeWidth={2}
+                    isAnimationActive={false}
                   />
                 </LineChart>
               </ResponsiveContainer>

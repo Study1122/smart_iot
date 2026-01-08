@@ -6,6 +6,7 @@ const telemetrySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Device",
       required: true,
+      index: true, // 🔥 important for queries
     },
 
     temperature: {
@@ -21,6 +22,13 @@ const telemetrySchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
+);
+
+telemetrySchema.index({ device: 1, createdAt: -1 });
+
+telemetrySchema.index(
+  { createdAt: 1 },
+  { expireAfterSeconds: 60 * 60 * 24 * 30 } // 30 days
 );
 
 const Telemetry = mongoose.model("Telemetry", telemetrySchema);
