@@ -8,6 +8,21 @@ import { GPIO_PINS,
          getGpioByValue 
 } from "../constants/gpioPins";
 import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import { 
+  getLatestTelemetry,
+  getTelemetryHistory,
+  
+} from "../services/telemetry";
+import {
   getDeviceById,
   toggleFeature,
   addFeature,
@@ -62,13 +77,15 @@ const DeviceDetails = () => {
     name: "",
     type: "switch",
   });
-
   const [editingFeatureId, setEditingFeatureId] = useState(null);
   const [editFeatureData, setEditFeatureData] = useState({
     name: "",
     type: "switch",
     gpio: null,
   });
+  //telemetry data
+  const [latestTelemetry, setLatestTelemetry] = useState(null);
+  const [telemetryHistory, setTelemetryHistory] = useState([]);
 
   /* ---------------- TOGGLE FEATURE ---------------- */
   const handleToggle = async (feature) => {
@@ -232,6 +249,17 @@ const DeviceDetails = () => {
       const deviceRes = await getDeviceById(id);
       if (deviceRes.success) {
         setCurrentDevice(deviceRes.device);
+        
+        // 🔥 Fetch latest telemetry
+        const telemetryRes = await getLatestTelemetry(id);
+        if (telemetryRes.success) {
+          setLatestTelemetry(telemetryRes.telemetry);
+        }
+        
+        const historyRes= await getTelemetryHistory(id, 20);
+        if (historyRes.success) {
+          setTelemetryHistory(historyRes.telemetry);
+        }
       }
     };
 
@@ -242,7 +270,16 @@ const DeviceDetails = () => {
 
   if (!user || !currentDevice) return <p style={{ padding: 20 }}>Loading...</p>;
   
-  const isDeviceOffline = currentDevice.status !== "online";
+  const isDeviceOffline =currentDevice.status !== "online";
+  
+  const chartData = [...telemetryHistory]
+  .reverse()
+  .map(t => ({
+    time: new Date(t.createdAt).toLocaleTimeString(),
+    temperature: t.temperature,
+    humidity: t.humidity,
+    voltage: t.voltage,
+  }));
 
   /* ---------------- JSX ---------------- */
   return (
@@ -299,6 +336,157 @@ const DeviceDetails = () => {
             }}
           >
             🔌 Device is offline — controls are disabled
+          </div>
+        )}
+        
+        {/* =========== TELEMETRY_JSX ============ */}
+        {latestTelemetry && (
+          <div
+            style={{
+              marginBottom: "1.25rem",
+              padding: "1rem",
+              borderRadius: 10,
+              border: `2px solid ${COLORS.accent}`,
+              background: COLORS.bgPage,
+              boxShadow: COLORS.shadowSoft,
+            }}
+          >
+            <h3 style={{ marginBottom: "0.5rem", color: COLORS.textPrimary }}>
+              📊 Live Telemetry
+            </h3>
+        
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+                gap: "0.75rem",
+                fontSize: 14,
+                color: COLORS.textSecondary,
+              }}
+            >
+              {latestTelemetry.temperature !== undefined && (
+                <div>🌡️ Temp: <strong>{latestTelemetry.temperature}°C</strong></div>
+              )}
+        
+              {latestTelemetry.humidity !== undefined && (
+                <div>💧 Humidity: <strong>{latestTelemetry.humidity}%</strong></div>
+              )}
+        
+              {latestTelemetry.voltage !== undefined && (
+                <div>🔋 Voltage: <strong>{latestTelemetry.voltage} V</strong></div>
+              )}
+        
+              <div>
+                🕒 Updated:{" "}
+                <strong>{timeAgo(latestTelemetry.createdAt)}</strong>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* ======== TELEMETRY HISTORY ========= */}
+        {telemetryHistory.length > 0 && (
+          <div
+            style={{
+              marginBottom: "1.5rem",
+              padding: "1rem",
+              borderRadius: 10,
+              border: `2px solid ${COLORS.borderLight}`,
+              background: COLORS.bgPage,
+              boxShadow: COLORS.shadowLightGray,
+            }}
+          >
+            <h3 style={{ marginBottom: "0.75rem", color: COLORS.textPrimary }}>
+              📈 Telemetry History
+            </h3>
+        
+            <div style={{ overflowX: "auto" }}>
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 13,
+                }}
+              >
+                <thead>
+                  <tr style={{ background: COLORS.accentLight }}>
+                    <th style={thStyle}>Time</th>
+                    <th style={thStyle}>Temp (°C)</th>
+                    <th style={thStyle}>Humidity (%)</th>
+                    <th style={thStyle}>Voltage (V)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {telemetryHistory.map((t) => (
+                    <tr key={t._id}>
+                      <td style={tdStyle}>{timeAgo(t.createdAt)}</td>
+                      <td style={tdStyle}>{t.temperature ?? "—"}</td>
+                      <td style={tdStyle}>{t.humidity ?? "—"}</td>
+                      <td style={tdStyle}>{t.voltage ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+        
+        {/* ======== TELEMETRY CHARTS ======== */}
+        {chartData.length > 0 && (
+          <div
+            style={{
+              marginBottom: "2rem",
+              padding: "1rem",
+              borderRadius: 10,
+              border: `2px solid ${COLORS.borderLight}`,
+              background: COLORS.bgPage,
+              boxShadow: COLORS.shadowLightGray,
+            }}
+          >
+            <h3 style={{ marginBottom: "0.75rem", color: COLORS.textPrimary }}>
+              📊 Telemetry Trends
+            </h3>
+        
+            <div style={{ width: "100%", height: 280 }}>
+              <ResponsiveContainer>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  
+                  <XAxis dataKey="time" />
+                  <YAxis />
+        
+                  <Tooltip />
+                  <Legend />
+        
+                  <Line
+                    type="monotone"
+                    dataKey="temperature"
+                    stroke="#ef4444"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Temperature (°C)"
+                  />
+        
+                  <Line
+                    type="monotone"
+                    dataKey="humidity"
+                    stroke="#0ea5e9"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Humidity (%)"
+                  />
+        
+                  <Line
+                    type="monotone"
+                    dataKey="voltage"
+                    stroke="#22c55e"
+                    strokeWidth={2}
+                    dot={false}
+                    name="Voltage (V)"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
@@ -658,6 +846,17 @@ const ghostBtn = {
   padding: "6px 12px",
   borderRadius: 8,
   border: `1px solid ${COLORS.borderLight}`,
+};
+
+const thStyle = {
+  padding: "0.5rem",
+  borderBottom: `2px solid ${COLORS.borderLight}`,
+  textAlign: "left",
+};
+
+const tdStyle = {
+  padding: "0.5rem",
+  borderBottom: `1px solid ${COLORS.borderLight}`,
 };
 
 

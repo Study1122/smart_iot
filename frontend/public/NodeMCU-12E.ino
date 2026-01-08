@@ -5,6 +5,12 @@
 #include <ArduinoJson.h>
 #include <Arduino.h>
 
+/* ================== TELEMETRY SENSOR ================== */
+#include <DHT.h>
+#define DHTPIN 4        // GPIO4 = D2
+#define DHTTYPE DHT11   // change to DHT22 if needed
+DHT dht(DHTPIN, DHTTYPE);
+
 /* ================== CONFIG ================== */
 
 #define PWM_MAX 1023
@@ -18,7 +24,7 @@ int levelToPwm(int level) {
 const char* ssid = "wifi_ssid_name";
 const char* password = "your_wifi_password";
 
-const char* serverUrl = "http://<bavkend_ip>:5000";
+const char* serverUrl = "http://<backend_ip>:5000";
 const char* deviceId = "<deviceId>";
 const char* deviceSecret = "<deviceSecret>";
 
@@ -28,9 +34,11 @@ WiFiClient client;
 
 unsigned long lastHeartbeat = 0;
 unsigned long lastCommandPoll = 0;
+unsigned long lastTelemetrySend = 0;
 
 const unsigned long HEARTBEAT_INTERVAL = 20000;
 const unsigned long COMMAND_INTERVAL   = 5000;
+const unsigned long TELEMETRY_INTERVAL = 29000; // 30 sec
 
 FeatureState featureStates[10];
 int featureCount = 0;
@@ -71,8 +79,41 @@ void sendHeartbeat() {
   http.addHeader("x-device-id", deviceId);
   http.addHeader("x-device-secret", deviceSecret);
 
-  Serial.println("Heartbeat status: " + String(http.POST("")));
+  http.POST("");
   http.end();
+}
+
+/* ================== TELEMETRY ================== */
+
+void sendTelemetry() {
+  if (WiFi.status() != WL_CONNECTED) return;
+
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
+
+  if (isnan(temperature) || isnan(humidity)) {
+    Serial.println("❌ Telemetry read failed");
+    return;
+  }
+
+  HTTPClient http;
+  http.begin(client, String(serverUrl) + "/telemetry");
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("x-device-id", deviceId);
+  http.addHeader("x-device-secret", deviceSecret);
+
+  StaticJsonDocument<256> doc;
+  doc["temperature"] = temperature;
+  doc["humidity"] = humidity;
+  doc["voltage"] = 3.3; // static or calculated later
+
+  String payload;
+  serializeJson(doc, payload);
+
+  http.POST(payload);
+  http.end();
+
+  Serial.println("Telemetry sent");
 }
 
 /* ================== FEATURE CACHE ================== */
@@ -113,7 +154,7 @@ void reportState(const char* featureId, bool state, int level) {
   String payload;
   serializeJson(doc, payload);
 
-  Serial.println("Report status: " + String(http.POST(payload)));
+  http.POST(payload);
   http.end();
 }
 
@@ -172,13 +213,13 @@ void fetchCommands() {
 void setup() {
   Serial.begin(115200);
   connectWiFi();
+  dht.begin();
 }
 
 /* ================== LOOP ================== */
 
 void loop() {
   connectWiFi();
-
   unsigned long now = millis();
 
   if (now - lastHeartbeat >= HEARTBEAT_INTERVAL) {
@@ -189,5 +230,10 @@ void loop() {
   if (now - lastCommandPoll >= COMMAND_INTERVAL) {
     fetchCommands();
     lastCommandPoll = now;
+  }
+
+  if (now - lastTelemetrySend >= TELEMETRY_INTERVAL) {
+    sendTelemetry();
+    lastTelemetrySend = now;
   }
 }
