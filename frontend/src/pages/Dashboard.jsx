@@ -171,15 +171,17 @@ const Dashboard = () => {
             return (
               <li
                 key={item._id}
+                
                 style={{
+                  position: "relative",
+                  borderRadius: 12,
+                  boxShadow: item.status === "online" ? COLORS.shadowSoft: COLORS.shadowGray,
+                  border: item.status === "online" ? `.1rem solid ${COLORS.accentLight}` :`.1rem solid ${COLORS.textSecondary}`,
                   padding: "1rem",
-                  borderRadius: 14,
-                  background: COLORS.bgCard,
-                  border: `1px solid ${COLORS.borderLight}`,
-                  boxShadow: isOffline
-                    ? COLORS.shadowSoft
-                    : COLORS.shadowMedium,
-                  opacity: isOffline ? 0.6 : 1,
+                  paddingBottom: "4rem",
+                  opacity: item.status !== "online" ? 0.6 : 1,
+                  background: item.status === "online" ? "#f9fafb" : "#fff",
+                  pointerEvents: item.status === "online" ? "auto" : "none",
                 }}
               >
                 {/* MAIN CLICK AREA */}
@@ -262,10 +264,16 @@ const Dashboard = () => {
                 {/* ACTIONS */}
                 <div
                   style={{
+                    position:"absolute",
+                    bottom: 0,left:0,
+                    width:"100%",
                     display: "flex",
-                    justifyContent: "flex-end",
-                    gap: "0.5rem",
-                    marginTop: "0.75rem",
+                    padding: ".7rem",
+                    borderRadius:"0 0 10px 10px",
+                    justifyContent: "space-between",
+                    backgroundColor: COLORS.accentLight,
+                    gap: "0.75rem",
+                    marginTop: 12,
                   }}
                 >
                   <button

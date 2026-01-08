@@ -253,7 +253,7 @@ const DeviceDetails = () => {
         {/* DEVICE HEADER */}
         <div
           style={{
-            border: "1px solid #e5e7eb",
+            border: `.15rem solid ${COLORS.accentLight}`,
             borderRadius: 12,
             padding: "1.25rem",
             marginBottom: "1.5rem",
@@ -309,6 +309,8 @@ const DeviceDetails = () => {
             justifyContent: "space-between",
             alignItems: "center",
             marginBottom: "1rem",
+            padding:".4rem 0",
+            borderBottom:`.1rem solid ${COLORS.accentLight}`,
           }}
         >
           <h3>Features</h3>
@@ -316,10 +318,12 @@ const DeviceDetails = () => {
             style={{
               padding: ".5rem",
               border: "none",
-              background : "red",
+              borderRadius: ".5rem",
+              backgroundColor : COLORS.accent,
+              color: COLORS.textSecondary
             }}
             onClick={() => setShowAddFeature((v) => !v)}>
-            ➕ Add Feature
+            ➕ Add New Feature
           </button>
         </div>
 
@@ -330,8 +334,9 @@ const DeviceDetails = () => {
               margin: "0px, 0px",
               padding: 12,
               borderRadius: 8,
-              background: "rgba(180, 255, 254, .3)",
-              border: "2px dotted rgba(50, 255, 254, .3)",
+              marginBottom: "1rem",
+              background: COLORS.accentMedium,
+              border:`2px solid ${COLORS.accent}`,
               display: "flex",
               flexWrap: "wrap",
               gap: "0.5rem",
@@ -404,36 +409,32 @@ const DeviceDetails = () => {
               <div
                 key={feature.featureId}
                 style={{
+                  position: "relative",
                   borderRadius: 12,
-                  border: feature.reportedState ? ".1rem solid rgba(14, 194, 89, 0.5)" : ".1rem solid rgba(192, 200, 191, 0.76)" ,
-                  boxShadow: feature.reportedState ? COLORS.shadowActive : COLORS.shadowInactive,
+                  boxShadow: feature.reportedState ? COLORS.shadow : COLORS.shadowGray,
+                  border: feature.reportedState ? `.1rem solid ${COLORS.accentLight}` :`.1rem solid ${COLORS.textSecondary}`,
                   padding: "1rem",
+                  paddingBottom: "4rem",
                   opacity: isDeviceOffline ? 0.6 : 1,
                   background: isDeviceOffline ? "#f9fafb" : "#fff",
                   pointerEvents: isDeviceOffline ? "none" : "auto",
                 }}>
-                {/* ---------- ROW 1: NAME + STATUS ---------- */}
-                <div
-                  style={{
+                {/* ------- ROW 1: NAME + STATUS ------- */}
+                <div style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
                     marginBottom: 4,
                   }}>
                   <strong style={{ fontSize: 16 }}>{feature.name}</strong>
-              
-                  <span
-                    style={{
+                  <span style={{
                       padding: "5px 10px",
                       borderRadius: 999,
                       textAlign: "center",
                       background: getFeatureBadge(feature).color,
                       color: "#fff",
                       fontSize: 14,
-                    }}
-                  >
-                    {getFeatureBadge(feature).text}
-                  </span>
+                    }}>{getFeatureBadge(feature).text}</span>
                 </div>
               
                 {/* ---------- ROW 2: META ---------- */}
@@ -450,7 +451,7 @@ const DeviceDetails = () => {
                   )}
                 </div>
               
-                {/* ------ ROW 3: CONTROLS ------- */}
+                {/* ---- ROW 3: Toggle CONTROLS ----- */}
                 {feature.type !== "fan" && (
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <ToggleSwitch
@@ -503,18 +504,25 @@ const DeviceDetails = () => {
                 {/* ---------- ROW 4: ACTIONS ---------- */}
                 <div
                   style={{
+                    position:"absolute",
+                    bottom: 0,left:0,
+                    width:"100%",
                     display: "flex",
+                    padding: ".7rem",
+                    borderRadius:"0 0 10px 10px",
                     justifyContent: "space-between",
+                    backgroundColor: COLORS.accentLight,
                     gap: "0.75rem",
                     marginTop: 12,
                   }}
                 >
                   <button
                     style={ iconButton }
-                    onClick={() => startEditFeature(feature)}>✏️ Edit</button>
+                    onClick={() => startEditFeature(feature)}>✏️</button>
                   <button 
                     style={{
                       ...ghostBtn,
+                      border: "none",
                       backgroundColor: COLORS.error,
                     }}
                     onClick={() => handleDeleteFeature(feature.featureId)}>🗑️</button>
@@ -527,8 +535,8 @@ const DeviceDetails = () => {
                       marginTop: 12,
                       padding: 12,
                       borderRadius: 8,
-                      background: "rgba(180, 255, 254, .3)",
-                      border: "2px dotted rgba(50, 255, 254, .3)",
+                      background: COLORS.accentMedium,
+                      border:`2px solid ${COLORS.accent}`,
                       display: "flex",
                       flexWrap: "wrap",
                       gap: "0.5rem",

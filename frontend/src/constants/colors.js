@@ -6,7 +6,8 @@ export const COLORS = {
   primaryLight: "#3B82F6",
   primaryDark: "#1E40AF",
 
-  accent: "#22C55E",       // Green (IoT ON / Active)
+  accent: "#22C55E",// Green (IoT ON / Active)
+  accentMedium: "#daffaa",
   accentLight: "#4ADE80",
   accentDark: "#15803D",
 
@@ -15,7 +16,7 @@ export const COLORS = {
   ========================== */
   success: "#22c55e",       // green-500
   warning: "#f59e0b",       // amber-500
-  error: "#ef4444",         // red-500
+  error: "#ff8161",         // red-500
   info: "#0EA5E9",         // Informational
   bgNavbar: "#fffefe",
   textInverse: "#000",     // black shadow
@@ -24,7 +25,7 @@ export const COLORS = {
      BACKGROUNDS
   ========================== */
   bgPage: "#f2fffb",        // slate-950
-  bgCard: "#b1e9e7",
+  bgCard: "#4ADE80",
   bgElevated: "#020617",
   bgMuted: "#F1F5F9",      // Disabled / Offline
   bgHover: "#E2E8F0",
@@ -52,6 +53,8 @@ export const COLORS = {
   /* =========================
      SHADOWS
   ========================== */
-  shadowSoft: "0 1px 3px #beedeb",
-  shadowMedium: "0 4px 12px #2eaeac",
+  shadow: "5px 5px 15px #007600",
+  shadowSoft: "5px 5px 15px #10a139",
+  shadowGray: "5px 5px 13px #3b3a3a",
+  shadowMedium: "5px 5px 12px #b8e67a",
 };
