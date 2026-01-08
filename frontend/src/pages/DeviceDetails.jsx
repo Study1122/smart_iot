@@ -319,7 +319,7 @@ const DeviceDetails = () => {
               padding: ".5rem",
               border: "none",
               borderRadius: ".5rem",
-              backgroundColor : COLORS.accent,
+              backgroundColor : COLORS.accentMedium,
               color: COLORS.textSecondary
             }}
             onClick={() => setShowAddFeature((v) => !v)}>
@@ -335,7 +335,7 @@ const DeviceDetails = () => {
               padding: 12,
               borderRadius: 8,
               marginBottom: "1rem",
-              background: COLORS.accentMedium,
+              background: COLORS.accentLight,
               border:`2px solid ${COLORS.accent}`,
               display: "flex",
               flexWrap: "wrap",
@@ -411,8 +411,8 @@ const DeviceDetails = () => {
                 style={{
                   position: "relative",
                   borderRadius: 12,
-                  boxShadow: feature.reportedState ? COLORS.shadow : COLORS.shadowGray,
-                  border: feature.reportedState ? `.1rem solid ${COLORS.accentLight}` :`.1rem solid ${COLORS.textSecondary}`,
+                  boxShadow: feature.reportedState ? COLORS.shadowSoft : COLORS.shadowLightGray,
+                  border: feature.reportedState ? `.1rem solid ${COLORS.accent}` :`.1rem solid ${COLORS.mediumGray}`,
                   padding: "1rem",
                   paddingBottom: "4rem",
                   opacity: isDeviceOffline ? 0.6 : 1,
@@ -511,7 +511,7 @@ const DeviceDetails = () => {
                     padding: ".7rem",
                     borderRadius:"0 0 10px 10px",
                     justifyContent: "space-between",
-                    backgroundColor: COLORS.accentLight,
+                    backgroundColor: feature.reportedState ? COLORS.accentLight : COLORS.lightGray,
                     gap: "0.75rem",
                     marginTop: 12,
                   }}
@@ -521,9 +521,9 @@ const DeviceDetails = () => {
                     onClick={() => startEditFeature(feature)}>✏️</button>
                   <button 
                     style={{
-                      ...ghostBtn,
-                      border: "none",
-                      backgroundColor: COLORS.error,
+                      ...iconButton,
+                      border: `1px solid ${COLORS.darkGray}`,
+                      backgroundColor: COLORS.bgPage,
                     }}
                     onClick={() => handleDeleteFeature(feature.featureId)}>🗑️</button>
                 </div>
@@ -535,7 +535,7 @@ const DeviceDetails = () => {
                       marginTop: 12,
                       padding: 12,
                       borderRadius: 8,
-                      background: COLORS.accentMedium,
+                      background: COLORS.accentLight,
                       border:`2px solid ${COLORS.accent}`,
                       display: "flex",
                       flexWrap: "wrap",
@@ -591,7 +591,11 @@ const DeviceDetails = () => {
                     </select>
                 
                     <button 
-                    style={iconButton}
+                      style={{
+                        ...iconButton, 
+                        width: "150px"
+                        
+                      }}
                     onClick={() => saveEditFeature(feature.featureId)}>💾 Save & Update</button>
                     <button
                     style={{...ghostBtn, backgroundColor: COLORS.error}}
@@ -633,6 +637,7 @@ const selectStyle = {
 const iconButton = {
   padding: "6px 10px",
   borderRadius: 8,
+  width: "60px",
   color: COLORS.bgNavbar,
   fontSize: 16,
   border: `none`,

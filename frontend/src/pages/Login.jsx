@@ -1,14 +1,28 @@
-import { useState } from "react";
-import { login } from "../services/auth";
+import { useState, useEffect } from "react";
+import { login, getMe } from "../services/auth";
 import { useNavigate, Link } from "react-router-dom";
 import { COLORS } from "../constants/colors";
-
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-
+  
+  //auto redirect if user already logged In
+  useEffect(()=>{
+    const checkLoggedInUser = async ()=>{
+      const token = localStorage.getItem('token')
+      if(!token) return;
+      
+      const res = await getMe();
+      if(res.success){
+        setExistingUser(res.success);
+        navigate("/dashboard", {replace: true})
+      }
+    };
+    checkLoggedInUser();
+  }, [navigate]);
+  
   const handleLogin = async (e) => {
     e.preventDefault();
     const res = await login(email, password);
@@ -21,6 +35,7 @@ const Login = () => {
   };
 
   return (
+    
     <div
       style={{
         minHeight: "100vh",

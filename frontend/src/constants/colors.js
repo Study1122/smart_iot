@@ -6,10 +6,10 @@ export const COLORS = {
   primaryLight: "#3B82F6",
   primaryDark: "#1E40AF",
 
-  accent: "#22C55E",// Green (IoT ON / Active)
-  accentMedium: "#daffaa",
-  accentLight: "#4ADE80",
-  accentDark: "#15803D",
+  accent: "#00e535",// Green (IoT ON / Active)
+  accentLight: "#c1ffc4",
+  accentMedium: "#91fd9d",
+  accentDark: "#52cd68",
 
   /* =========================
      STATUS COLORS
@@ -17,7 +17,7 @@ export const COLORS = {
   success: "#22c55e",       // green-500
   warning: "#f59e0b",       // amber-500
   error: "#ff8161",         // red-500
-  info: "#0EA5E9",         // Informational
+  info: "#ff9f2c",         // Informational
   bgNavbar: "#fffefe",
   textInverse: "#000",     // black shadow
 
@@ -29,7 +29,10 @@ export const COLORS = {
   bgElevated: "#020617",
   bgMuted: "#F1F5F9",      // Disabled / Offline
   bgHover: "#E2E8F0",
-
+  lightGray : "#d6dad7",
+  mediumGray : "#939794",
+  darkGray: "#6c6f6c",
+  
   /* =========================
      TEXT COLORS
   ========================== */
@@ -53,8 +56,10 @@ export const COLORS = {
   /* =========================
      SHADOWS
   ========================== */
-  shadow: "5px 5px 15px #007600",
-  shadowSoft: "5px 5px 15px #10a139",
-  shadowGray: "5px 5px 13px #3b3a3a",
-  shadowMedium: "5px 5px 12px #b8e67a",
+  shadow: "2px 2px 10px #00b700",
+  shadowSoft: "2px 2px 10px #8bff83",
+  shadowMedium: "2px 2px 10px #00e535",
+  
+  shadowLightGray: "2px 2px 10px #bdc0be",
+  shadowDarkGray: "2px 2px 10px #6c6f6c",
 };

@@ -175,8 +175,8 @@ const Dashboard = () => {
                 style={{
                   position: "relative",
                   borderRadius: 12,
-                  boxShadow: item.status === "online" ? COLORS.shadowSoft: COLORS.shadowGray,
-                  border: item.status === "online" ? `.1rem solid ${COLORS.accentLight}` :`.1rem solid ${COLORS.textSecondary}`,
+                  boxShadow: item.status === "online" ? COLORS.shadowSoft: COLORS.shadowDarkGray,
+                  border: item.status === "online" ? `.1rem solid ${COLORS.accentDark}` :`.1rem solid ${COLORS.textSecondary}`,
                   padding: "1rem",
                   paddingBottom: "4rem",
                   opacity: item.status !== "online" ? 0.6 : 1,
@@ -191,6 +191,7 @@ const Dashboard = () => {
                     navigate(`/device/${item._id}`)
                   }
                   style={{
+                    
                     cursor: item.status === "online" ? "pointer" : "default",
                   }}
                 >
