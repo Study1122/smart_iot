@@ -62,4 +62,6 @@ export const COLORS = {
   
   shadowLightGray: "2px 2px 10px #bdc0be",
   shadowDarkGray: "2px 2px 10px #6c6f6c",
+  
+  
 };

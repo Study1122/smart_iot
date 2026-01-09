@@ -31,10 +31,10 @@
 }
 
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f2fffb;
+  color: #3b3a3a;
   min-height: 100vh;      
-  background-color: --bg-page;
-  color: #333;
 }
 
 a {

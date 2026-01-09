@@ -20,27 +20,27 @@ const Register = () => {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: COLORS.bgPage,
-        padding: "1rem",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 360,
-          padding: "2rem",
-          borderRadius: 16,
-          backgroundColor: COLORS.bgCard,
-          boxShadow: COLORS.shadowMedium,
-          border: `1px solid ${COLORS.borderLight}`,
-        }}
-      >
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: COLORS.accentLight,
+            padding: "1rem",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: 360,
+              padding: "2rem",
+              borderRadius: 16,
+              backgroundColor: COLORS.accentMedium,
+              boxShadow: COLORS.shadowLightGray,
+              border: `1px solid ${COLORS.accent}`,
+            }}
+          >
         <h1
           style={{
             textAlign: "center",
@@ -94,7 +94,7 @@ const Register = () => {
               borderRadius: 8,
               border: "none",
               backgroundColor: COLORS.primary,
-              color: COLORS.textInverse,
+              color: COLORS.bgPage,
               fontWeight: 600,
               cursor: "pointer",
             }}

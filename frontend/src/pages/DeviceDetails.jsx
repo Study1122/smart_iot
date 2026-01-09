@@ -1,6 +1,7 @@
 import Navbar from "../components/Navbar/Navbar";
 import { getMe } from "../services/auth";
 import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts";
 import { timeAgo } from "../services/timeAgo";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -10,6 +11,8 @@ import { GPIO_PINS,
 } from "../constants/gpioPins";
 import {
   LineChart,
+  AreaChart,
+  Area,
   Line,
   XAxis,
   YAxis,
@@ -256,7 +259,7 @@ const DeviceDetails = () => {
         if (telemetryRes.success) {
           setLatestTelemetry(telemetryRes.telemetry);
         }
-        
+        //fetch telemetry History
         const historyRes= await getTelemetryHistory(id, 20);
         if (historyRes.success) {
           setTelemetryHistory(historyRes.telemetry);
@@ -300,10 +303,13 @@ const DeviceDetails = () => {
             border: `.15rem solid ${COLORS.accentLight}`,
             borderRadius: 12,
             padding: "1.25rem",
+            boxShadow: COLORS.shadowLightGray,
             marginBottom: "1.5rem",
           }}
         >
-          <h2 style={{ marginBottom: 6 }}>{currentDevice.name}</h2>
+          <h2 style={{ marginBottom: 6, ...FONTS.h2,
+            fontSize: FONTS.xl,
+          }}>{currentDevice.name}</h2>
           <div style={{ fontSize: 14, color: "#555" }}>
             <div>Device ID: {currentDevice.deviceId}</div>
             <div>
@@ -330,6 +336,10 @@ const DeviceDetails = () => {
           </div>
         </div>
         
+        <div>
+          
+        </div>
+        
         {isDeviceOffline && (
           <div
             style={{
@@ -353,9 +363,9 @@ const DeviceDetails = () => {
               marginBottom: "1rem",
               padding: "1rem",
               borderRadius: 12,
-              //border: `2px solid ${COLORS.accent}`,
-              background: COLORS.bgPage,
-              boxShadow: COLORS.shadowSoft,
+              border: `2px solid ${COLORS.accentLight}`,
+              backgroundColor: COLORS.bgPage,
+              boxShadow: COLORS.shadowLightGray,
             }}
           >
             <h3 style={{ marginBottom: "0.5rem", color: COLORS.textPrimary }}>
@@ -364,13 +374,13 @@ const DeviceDetails = () => {
         
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: window.innerWidth < 480
-                  ? "1fr"
-                  : "repeat(auto-fit, minmax(140px, 1fr))",
-                gap: "0.75rem",
-                fontSize: 14,
-                color: COLORS.textSecondary,
+                ...FONTS.h3,
+                fontSize: FONTS.md,
+                display: "flex",
+                justifyContent: "space-evenly",
+                lineHeight: "1.5rem",
+                alignItems: "center",
+                flexWrap: "wrap",
               }}
             >
               {latestTelemetry.temperature !== undefined && (
@@ -400,7 +410,7 @@ const DeviceDetails = () => {
               marginBottom: "1.5rem",
               padding: "1rem",
               borderRadius: 10,
-              border: `2px solid ${COLORS.borderLight}`,
+              border: `2px solid ${COLORS.accentLight}`,
               background: COLORS.bgPage,
               boxShadow: COLORS.shadowLightGray,
             }}
@@ -456,17 +466,20 @@ const DeviceDetails = () => {
                 
         {/* ========= TELEMETRY CHART ========= */}
         {telemetryHistory.length > 0 && (
+        console.log(telemetryHistory),
           <div
             style={{
+              ...FONTS,
+              fontStyle: FONTS.primary,
               marginBottom: "1.5rem",
               padding: "1rem",
               borderRadius: 10,
-              border: `2px solid ${COLORS.borderLight}`,
+              border: `2px solid ${COLORS.accentLight}`,
               background: COLORS.bgPage,
               boxShadow: COLORS.shadowLightGray,
             }}
           >
-            <h3 style={{ marginBottom: "0.75rem", color: COLORS.textPrimary }}>
+            <h3 style={{ ...FONTS.h2, marginBottom: "0.75rem", color: COLORS.textPrimary }}>
               📊 Telemetry Chart
             </h3>
         
@@ -479,48 +492,77 @@ const DeviceDetails = () => {
                 outline: "none",
                 WebkitTapHighlightColor: "transparent",
               }}
+              
               onMouseDown={(e) => e.preventDefault()}
+              
             >
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
+                <AreaChart
                   data={[...telemetryHistory].reverse()}
-                  margin={{ top: 10, right: 16, left: -10, bottom: 0 }}
+                  margin={{ top: 15, right: 20, left: 10, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid stroke="#aaa" strokeDasharray="5 5" />
                   <XAxis
                     dataKey="createdAt"
                     tickFormatter={(v) => timeAgo(v)}
                     fontSize={10}
                   />
-                  <YAxis fontSize={11} />
-                  <Tooltip />
+                  <YAxis fontSize={11} width={"auto"}/>
+                  <Tooltip 
+                    formatter={(value, name) => {
+                      if (name === "temperature") return [`${value} °C`, "Temperature"];
+                      if (name === "humidity") return [`${value} %`, "Humidity"];
+                      if (name === "voltage") return [`${value} V`, "Voltage"];
+                      return [value, name];
+                    }}
+                  />
                   <Legend />
+                  
+                  <defs>
+                    <linearGradient id="tempFade" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={COLORS.error} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={COLORS.error} stopOpacity={0} />
+                    </linearGradient>
+                    
+                    <linearGradient id="humidFade" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={COLORS.info} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={COLORS.info} stopOpacity={0} />
+                    </linearGradient>
+                    
+                    <linearGradient id="voltageFade" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={COLORS.success} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={COLORS.success} stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
         
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="temperature"
                     stroke={COLORS.error}
+                    fill="url(#tempFade)"
                     dot={false}
                     strokeWidth={2}
                     isAnimationActive={false}
                   />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="humidity"
                     stroke={COLORS.info}
+                    fill="url(#humidFade)"
                     dot={false}
                     strokeWidth={2}
                     isAnimationActive={false}
                   />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="voltage"
                     stroke={COLORS.success}
+                    fill="url(#voltageFade)"
                     dot={false}
                     strokeWidth={2}
                     isAnimationActive={false}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -698,8 +740,30 @@ const DeviceDetails = () => {
                 {/* ---------- FAN CONTROL ---------- */}
                 {feature.type === "fan" && (
                   <div style={{ marginTop: 8 }}>
-                    <label style={{ fontSize: 13 }}>
-                      Speed: <strong>{feature.desiredLevel}</strong>
+                    <label 
+                      style={{ 
+                        fontSize: 13,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 5
+                      }}>
+                      Fan Speed: 
+                      {feature.desiredLevel === feature.reportedLevel && (
+                        <strong>
+                          {feature.desiredLevel}
+                        </strong>)}
+                        
+                      {feature.desiredState !== feature.reportedState || feature.desiredLevel !== feature.reportedLevel && (
+                        <div style={{ fontSize: 12, color: "#f59e0b",}}>
+                          ⏳ Syncing with device…
+                        </div>
+                      )}
+                
+                      {feature.desiredLevel === 0 && (
+                        <div style={{ fontSize: 12, color: "#6b7280", }}>
+                          Move slider to turn ON
+                        </div>
+                      )}
                     </label>
               
                     <input
@@ -716,18 +780,6 @@ const DeviceDetails = () => {
                       }
                       style={{ width: "100%", marginTop: 4 }}
                     />
-              
-                    {feature.desiredState !== feature.reportedState && (
-                      <div style={{ fontSize: 12, color: "#f59e0b", marginTop: 4 }}>
-                        ⏳ Syncing with device…
-                      </div>
-                    )}
-              
-                    {feature.desiredLevel === 0 && (
-                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
-                        Move slider to turn ON
-                      </div>
-                    )}
                   </div>
                 )}
               
@@ -752,7 +804,7 @@ const DeviceDetails = () => {
                   <button 
                     style={{
                       ...iconButton,
-                      border: `1px solid ${COLORS.darkGray}`,
+                      border: `1px solid ${COLORS.error}`,
                       backgroundColor: COLORS.bgPage,
                     }}
                     onClick={() => handleDeleteFeature(feature.featureId)}>🗑️</button>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
 import { timeAgo } from "../services/timeAgo";
 import { COLORS } from "../constants/colors";
+import { FONTS } from "../constants/fonts";
 
 import { 
   getUserDevices, 
@@ -134,10 +135,19 @@ const Dashboard = () => {
           padding: "0 1rem",
         }}
       >
-        <h1 style={{ marginBottom: "0.25rem", color: COLORS.textPrimary }}>
+        <h1 style={{
+          ...FONTS.h1,
+          marginBottom: "0.25rem",
+          color: COLORS.textPrimary,
+        }}>
           Dashboard
         </h1>
-        <p style={{ color: COLORS.textSecondary, marginBottom: "1rem" }}>
+        <p style={{ 
+          ...FONTS.p,
+          color: COLORS.textSecondary,
+          marginBottom: "1rem" 
+          
+        }}>
           Your Devices
         </p>
   
@@ -158,12 +168,20 @@ const Dashboard = () => {
         </button>
   
         {devices.length === 0 && (
-          <p style={{ color: COLORS.textSecondary }}>
+          <p style={{...FONTS.p, color: COLORS.textSecondary }}>
             No devices registered yet.
           </p>
         )}
   
-        <ul style={{ listStyle: "none", padding: 0, display: "grid", gap: "1rem" }}>
+        <ul 
+          style={{ 
+            ...FONTS.h3,
+            fontWeight: FONTS.semibold,
+            listStyle: "none", 
+            padding: 0, display: "grid", 
+            gap: "1rem",
+          }}>
+          
           {devices.map((item) => {
             const { total, on, pending } = getDeviceStats(item);
             const isOffline = item.status !== "online";
@@ -272,7 +290,7 @@ const Dashboard = () => {
                     padding: ".7rem",
                     borderRadius:"0 0 10px 10px",
                     justifyContent: "space-between",
-                    backgroundColor: COLORS.accentLight,
+                    backgroundColor: item.status === "online" ? COLORS.accentLight : COLORS.lightGray,
                     gap: "0.75rem",
                     marginTop: 12,
                   }}
@@ -294,7 +312,8 @@ const Dashboard = () => {
                     }}
                     style={{
                       ...iconButton,
-                      color: COLORS.error,
+                      border: `.1rem solid ${COLORS.error}`,
+                      backgroundColor : COLORS.bgPage,
                     }}
                   >
                     🗑️
@@ -338,11 +357,37 @@ const Dashboard = () => {
   );
 };
 
+const inputStyle = {
+  width: "100%",
+  padding: "0.55rem",
+  borderRadius: 8,
+  border: `1px solid ${COLORS.borderLight}`,
+  fontSize: 14,
+  outline: "none",
+};
+
+const selectStyle = {
+  ...inputStyle,
+  appearance: "none",          // removes default arrow
+  WebkitAppearance: "none",
+  MozAppearance: "none",
+  backgroundImage: `linear-gradient(45deg, transparent 50%, ${COLORS.textSecondary} 50%),
+                    linear-gradient(135deg, ${COLORS.textSecondary} 50%, transparent 50%)`,
+  backgroundPosition: "calc(100% - 18px) 55%, calc(100% - 13px) 55%",
+  backgroundSize: "5px 5px, 5px 5px",
+  backgroundRepeat: "no-repeat",
+  cursor: "pointer",
+};
+
+
 const iconButton = {
   padding: "6px 10px",
   borderRadius: 8,
-  border: `1px solid ${COLORS.borderDark}`,
-  background: COLORS.bgCard,
+  width: "60px",
+  color: COLORS.bgNavbar,
+  fontSize: 16,
+  border: `none`,
+  background: COLORS.primaryLight,
   cursor: "pointer",
 };
 
@@ -359,7 +404,18 @@ const ghostBtn = {
   padding: "6px 12px",
   borderRadius: 8,
   border: `1px solid ${COLORS.borderLight}`,
-  background: "transparent",
 };
+
+const thStyle = {
+  padding: "0.5rem",
+  borderBottom: `2px solid ${COLORS.borderLight}`,
+  textAlign: "left",
+};
+
+const tdStyle = {
+  padding: "0.5rem",
+  borderBottom: `1px solid ${COLORS.borderLight}`,
+};
+
 
 export default Dashboard;

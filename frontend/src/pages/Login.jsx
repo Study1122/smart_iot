@@ -42,7 +42,7 @@ const Login = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: COLORS.bgPage,
+        backgroundColor: COLORS.accentLight,
         padding: "1rem",
       }}
     >
@@ -52,9 +52,9 @@ const Login = () => {
           maxWidth: 360,
           padding: "2rem",
           borderRadius: 16,
-          backgroundColor: COLORS.bgCard,
-          boxShadow: COLORS.shadowMedium,
-          border: `1px solid ${COLORS.borderLight}`,
+          backgroundColor: COLORS.accentMedium,
+          boxShadow: COLORS.shadowLightGray,
+          border: `1px solid ${COLORS.accent}`,
         }}
       >
         <h1
@@ -101,7 +101,7 @@ const Login = () => {
               borderRadius: 8,
               border: "none",
               backgroundColor: COLORS.primary,
-              color: COLORS.textInverse,
+              color: COLORS.bgPage,
               fontWeight: 600,
               fontSize: 15,
               cursor: "pointer",
