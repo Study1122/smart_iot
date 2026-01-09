@@ -211,3 +211,8 @@ export const deleteFeature = async (deviceId, featureId) => {
     };
   }
 };
+
+
+
+
+

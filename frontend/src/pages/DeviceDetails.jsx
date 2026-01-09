@@ -5,8 +5,24 @@ import { timeAgo } from "../services/timeAgo";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { GPIO_PINS, 
-         getGpioByValue 
+         getGpioByValue,
+         RESERVED_GPIO
 } from "../constants/gpioPins";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
+import { 
+  getLatestTelemetry,
+  getTelemetryHistory,
+  
+} from "../services/telemetry";
 import {
   getDeviceById,
   toggleFeature,
@@ -25,7 +41,7 @@ const ToggleSwitch = ({ checked, disabled, onChange }) => {
         height: 28,
         border: `3px solid ${COLORS.borderDark}`,
         borderRadius: 999,
-        background: checked ? COLORS.success : COLORS.error,
+        background:checked ? COLORS.success : COLORS.error,
         position: "relative",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
@@ -62,13 +78,15 @@ const DeviceDetails = () => {
     name: "",
     type: "switch",
   });
-
   const [editingFeatureId, setEditingFeatureId] = useState(null);
   const [editFeatureData, setEditFeatureData] = useState({
     name: "",
     type: "switch",
     gpio: null,
   });
+  //telemetry data
+  const [latestTelemetry, setLatestTelemetry] = useState(null);
+  const [telemetryHistory, setTelemetryHistory] = useState([]);
 
   /* ---------------- TOGGLE FEATURE ---------------- */
   const handleToggle = async (feature) => {
@@ -232,6 +250,17 @@ const DeviceDetails = () => {
       const deviceRes = await getDeviceById(id);
       if (deviceRes.success) {
         setCurrentDevice(deviceRes.device);
+        
+        // 🔥 Fetch latest telemetry
+        const telemetryRes = await getLatestTelemetry(id);
+        if (telemetryRes.success) {
+          setLatestTelemetry(telemetryRes.telemetry);
+        }
+        
+        const historyRes= await getTelemetryHistory(id, 20);
+        if (historyRes.success) {
+          setTelemetryHistory(historyRes.telemetry);
+        }
       }
     };
 
@@ -242,15 +271,30 @@ const DeviceDetails = () => {
 
   if (!user || !currentDevice) return <p style={{ padding: 20 }}>Loading...</p>;
   
-  const isDeviceOffline = currentDevice.status !== "online";
+  const isDeviceOffline =currentDevice.status !== "online";
+  
+  const chartData = [...telemetryHistory]
+  .reverse()
+  .map(t => ({
+    time: new Date(t.createdAt).toLocaleTimeString(),
+    temperature: t.temperature,
+    humidity: t.humidity,
+    voltage: t.voltage,
+  }));
 
   /* ---------------- JSX ---------------- */
   return (
     <>
       <Navbar user={user} />
 
-      <div style={{ maxWidth: 900, margin: "2rem auto", padding: "0 1rem" }}>
-        {/* DEVICE HEADER */}
+      <div 
+        style={{ 
+          maxWidth: "900px", 
+          margin: "2rem auto",
+          padding: "0 1rem" ,
+          width:"100%",
+        }}>
+          {/* DEVICE HEADER */}
         <div
           style={{
             border: `.15rem solid ${COLORS.accentLight}`,
@@ -299,6 +343,186 @@ const DeviceDetails = () => {
             }}
           >
             🔌 Device is offline — controls are disabled
+          </div>
+        )}
+        
+        {/* =========== TELEMETRY_JSX ============ */}
+        {latestTelemetry && (
+          <div
+            style={{
+              marginBottom: "1rem",
+              padding: "1rem",
+              borderRadius: 12,
+              //border: `2px solid ${COLORS.accent}`,
+              background: COLORS.bgPage,
+              boxShadow: COLORS.shadowSoft,
+            }}
+          >
+            <h3 style={{ marginBottom: "0.5rem", color: COLORS.textPrimary }}>
+              📊 Live Telemetry
+            </h3>
+        
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: window.innerWidth < 480
+                  ? "1fr"
+                  : "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: "0.75rem",
+                fontSize: 14,
+                color: COLORS.textSecondary,
+              }}
+            >
+              {latestTelemetry.temperature !== undefined && (
+                <div>🌡️ Temp: <strong>{latestTelemetry.temperature}°C</strong></div>
+              )}
+        
+              {latestTelemetry.humidity !== undefined && (
+                <div>💧 Humidity: <strong>{latestTelemetry.humidity}%</strong></div>
+              )}
+        
+              {latestTelemetry.voltage !== undefined && (
+                <div>🔋 Voltage: <strong>{latestTelemetry.voltage} V</strong></div>
+              )}
+        
+              <div>
+                🕒 Updated:{" "}
+                <strong>{timeAgo(latestTelemetry.createdAt)}</strong>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* ======== TELEMETRY HISTORY ========= */}
+        {telemetryHistory.length > 0 && (
+          <div
+            style={{
+              marginBottom: "1.5rem",
+              padding: "1rem",
+              borderRadius: 10,
+              border: `2px solid ${COLORS.borderLight}`,
+              background: COLORS.bgPage,
+              boxShadow: COLORS.shadowLightGray,
+            }}
+          >
+            <h3 style={{ marginBottom: "0.75rem", color: COLORS.textPrimary }}>
+              📈 Telemetry History
+            </h3>
+        
+            {/* ✅ ONLY TABLE SCROLLS */}
+            <div
+              style={{
+                maxHeight: 250,
+                overflowY: "auto",
+              }}
+            >
+              <table
+                style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontSize: 13,
+                }}
+              >
+                <thead
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    background: COLORS.accentLight,
+                    zIndex: 1,
+                  }}
+                >
+                  <tr>
+                    <th style={thStyle}>Time</th>
+                    <th style={thStyle}>Temp (°C)</th>
+                    <th style={thStyle}>Humidity (%)</th>
+                    <th style={thStyle}>Voltage (V)</th>
+                  </tr>
+                </thead>
+        
+                <tbody>
+                  {telemetryHistory.map((t) => (
+                    <tr key={t._id}>
+                      <td style={tdStyle}>{timeAgo(t.createdAt)}</td>
+                      <td style={tdStyle}>{t.temperature ?? "—"}</td>
+                      <td style={tdStyle}>{t.humidity ?? "—"}</td>
+                      <td style={tdStyle}>{t.voltage ?? "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+                
+        {/* ========= TELEMETRY CHART ========= */}
+        {telemetryHistory.length > 0 && (
+          <div
+            style={{
+              marginBottom: "1.5rem",
+              padding: "1rem",
+              borderRadius: 10,
+              border: `2px solid ${COLORS.borderLight}`,
+              background: COLORS.bgPage,
+              boxShadow: COLORS.shadowLightGray,
+            }}
+          >
+            <h3 style={{ marginBottom: "0.75rem", color: COLORS.textPrimary }}>
+              📊 Telemetry Chart
+            </h3>
+        
+            {/* ✅ MOBILE-SAFE FIXED HEIGHT */}
+            <div
+              style={{
+                height: 260,
+                width: "100%",
+                overflow: "hidden",
+                outline: "none",
+                WebkitTapHighlightColor: "transparent",
+              }}
+              onMouseDown={(e) => e.preventDefault()}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={[...telemetryHistory].reverse()}
+                  margin={{ top: 10, right: 16, left: -10, bottom: 0 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="createdAt"
+                    tickFormatter={(v) => timeAgo(v)}
+                    fontSize={10}
+                  />
+                  <YAxis fontSize={11} />
+                  <Tooltip />
+                  <Legend />
+        
+                  <Line
+                    type="monotone"
+                    dataKey="temperature"
+                    stroke={COLORS.error}
+                    dot={false}
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="humidity"
+                    stroke={COLORS.info}
+                    dot={false}
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="voltage"
+                    stroke={COLORS.success}
+                    dot={false}
+                    strokeWidth={2}
+                    isAnimationActive={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
 
@@ -362,6 +586,12 @@ const DeviceDetails = () => {
               <option value="">Select GPIO</option>
             
               {GPIO_PINS.filter((pin) => {
+              
+                // ❌ block telemetry pins
+                if (RESERVED_GPIO.telemetry.includes(pin.value)) {
+                  return false;
+                }
+                
                 if (newFeature.type === "fan") {
                   return pin.type === "PWM";
                 }
@@ -658,6 +888,17 @@ const ghostBtn = {
   padding: "6px 12px",
   borderRadius: 8,
   border: `1px solid ${COLORS.borderLight}`,
+};
+
+const thStyle = {
+  padding: "0.5rem",
+  borderBottom: `2px solid ${COLORS.borderLight}`,
+  textAlign: "left",
+};
+
+const tdStyle = {
+  padding: "0.5rem",
+  borderBottom: `1px solid ${COLORS.borderLight}`,
 };
 
 

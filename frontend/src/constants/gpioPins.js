@@ -18,3 +18,7 @@ export const GPIO_PINS = [
 // helpers
 export const getGpioByValue = (value) =>
   GPIO_PINS.find((p) => p.value === value);
+  
+export const RESERVED_GPIO = {
+  telemetry: [4], // GPIO4 used by temperature sensor
+};
