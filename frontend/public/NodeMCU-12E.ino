@@ -36,9 +36,9 @@ unsigned long lastHeartbeat = 0;
 unsigned long lastCommandPoll = 0;
 unsigned long lastTelemetrySend = 0;
 
-const unsigned long HEARTBEAT_INTERVAL = 20000;
-const unsigned long COMMAND_INTERVAL   = 5000;
-const unsigned long TELEMETRY_INTERVAL = 29000; // 30 sec
+const unsigned long HEARTBEAT_INTERVAL = 10000;
+const unsigned long COMMAND_INTERVAL   = 1500;
+const unsigned long TELEMETRY_INTERVAL = 10000; // 30 sec
 
 FeatureState featureStates[10];
 int featureCount = 0;

@@ -1,5 +1,6 @@
 import Device from "../models/device.model.js";
 import crypto from "crypto";
+import { getIO } from "../socket.js";
 
 /**
  *  Register a new device (user action)
@@ -368,6 +369,7 @@ export const reportDeviceState = async (req, res) => {
 
     // ✅ device confirms reality
     feature.reportedState = state;
+    
 
     if (feature.type === "fan" && level !== undefined) {
       if (level < 0 || level > 5) {
@@ -380,8 +382,18 @@ export const reportDeviceState = async (req, res) => {
     }
     
     feature.lastUpdated = new Date();
-
+    
+    
+    
     await device.save();
+    
+    //Websocket 
+    io.to(`device:${device._id}`).emit("feature:update", {
+      deviceId: device._id,
+      featureId,
+      reportedState: feature.reportedState,
+      reportedLevel: feature.reportedLevel,
+    });
 
     res.json({
       success: true,

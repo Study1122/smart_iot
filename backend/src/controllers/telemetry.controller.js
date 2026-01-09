@@ -1,3 +1,4 @@
+import { getIO } from "../socket.js";
 import Telemetry from "../models/telemetry.model.js";
 import Device from "../models/device.model.js";
 
@@ -8,7 +9,8 @@ export const createTelemetry = async (req, res) => {
   try {
     const device = req.device; // from deviceAuth middleware
     const { temperature, humidity, voltage } = req.body;
-
+    
+    
     // Save telemetry
     const telemetry = await Telemetry.create({
       device: device._id,
@@ -20,6 +22,13 @@ export const createTelemetry = async (req, res) => {
     // Update device heartbeat
     device.lastSeen = new Date();
     device.status = "online";
+    const io = getIO();
+
+    io.to(`device:${device._id}`).emit("telemetry:update", {
+      deviceId: device._id,
+      telemetry,
+    });
+    
     await device.save();
 
     res.status(201).json({

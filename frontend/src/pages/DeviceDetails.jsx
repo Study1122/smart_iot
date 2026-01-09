@@ -1,3 +1,4 @@
+import { connectSocket, disconnectSocket } from "../services/socket";
 import Navbar from "../components/Navbar/Navbar";
 import { getMe } from "../services/auth";
 import { COLORS } from "../constants/colors";
@@ -268,9 +269,52 @@ const DeviceDetails = () => {
     };
 
     fetchData();
-    intervalId = setInterval(fetchData, 5000);
+    intervalId = setInterval(fetchData, 15000);
     return () => clearInterval(intervalId);
   }, [id, navigate]);
+  
+  // websocket useEffect (FIXED)
+  useEffect(() => {
+    if (!currentDevice?._id) return;
+  
+    const socket = connectSocket();
+    if (!socket) return;
+  
+    // Join device room
+    socket.emit("join-device", currentDevice._id);
+  
+    // Listen for feature updates
+    const onFeatureUpdate = (payload) => {
+      const { featureId, reportedState, reportedLevel } = payload;
+  
+      setCurrentDevice((prev) => {
+        if (!prev) return prev;
+  
+        return {
+          ...prev,
+          features: prev.features.map((f) =>
+            f.featureId !== featureId
+              ? f
+              : {
+                  ...f,
+                  reportedState,
+                  reportedLevel:
+                    f.type === "fan" ? reportedLevel : f.reportedLevel,
+                  lastUpdated: new Date(),
+                }
+          ),
+        };
+      });
+    };
+  
+    socket.on("feature:update", onFeatureUpdate);
+  
+    return () => {
+      socket.emit("device:leave", currentDevice._id);
+      socket.off("feature:update", onFeatureUpdate);
+      // ❌ do NOT disconnect socket globally here if reused
+    };
+  }, [currentDevice?._id]);
 
   if (!user || !currentDevice) return <p style={{ padding: 20 }}>Loading...</p>;
   
@@ -466,7 +510,7 @@ const DeviceDetails = () => {
                 
         {/* ========= TELEMETRY CHART ========= */}
         {telemetryHistory.length > 0 && (
-        console.log(telemetryHistory),
+        
           <div
             style={{
               ...FONTS,
