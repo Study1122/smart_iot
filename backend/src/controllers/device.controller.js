@@ -1,6 +1,12 @@
 import Device from "../models/device.model.js";
 import crypto from "crypto";
 import { getIO } from "../socket.js";
+import Telemetry from "../models/telemetry.model.js";
+
+
+ /*
+ content://com.termux.documents/tree/%2Fdata%2Fdata%2Fcom.termux%2Ffiles%2Fhome%2Fsmart-iot::/data/data/com.termux/files/home/smart-iot/backend/src/controllers/device.controller.js
+ */
 
 /**
  *  Register a new device (user action)
@@ -477,21 +483,27 @@ export const deleteDevice = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const device = await Device.findOneAndDelete({
+    const device = await Device.findOne({
       _id: id,
       owner: req.user._id,
     });
-
+    //Check Device
     if (!device) {
       return res.status(404).json({
         success: false,
         message: "Device not found",
       });
     }
+    
+    //Delete Telemetry First
+    await Telemetry.deleteMany({ device: device._id})
+    
+    //Delete Device Now
+    await device.deleteOne();
 
     res.json({
       success: true,
-      message: "Device deleted successfully",
+      message: "Device and Telemetry deleted successfully",
     });
   } catch (error) {
     res.status(500).json({
@@ -565,6 +577,30 @@ export const updateDeviceFeatureMeta = async (req, res) => {
       message: error.message,
     });
   }
+};
+
+/**
+ * GET SECRET TOKEN
+ */
+export const getDeviceSecret = async (req, res) => {
+  const { id } = req.params;
+
+  const device = await Device.findOne({
+    _id: id,
+    owner: req.user._id,
+  });
+
+  if (!device) {
+    return res.status(404).json({
+      success: false,
+      message: "Device not found",
+    });
+  }
+
+  res.json({
+    success: true,
+    secret: device.secret,
+  });
 };
 
 /**

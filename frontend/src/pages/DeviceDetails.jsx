@@ -88,6 +88,16 @@ const DeviceDetails = () => {
     type: "switch",
     gpio: null,
   });
+  const [showSecret, setShowSecret] = useState(false);
+  const [deviceSecret, setDeviceSecret] = useState(null);
+  
+  const fetchSecret = async () => {
+    const res = await getDeviceSecretAPI(currentDevice._id);
+    if (res.success) {
+      setDeviceSecret(res.secret);
+      setShowSecret(true);
+    }
+  };
   //telemetry data
   const [latestTelemetry, setLatestTelemetry] = useState(null);
   const [telemetryHistory, setTelemetryHistory] = useState([]);
@@ -531,6 +541,7 @@ const DeviceDetails = () => {
             <div
               style={{
                 height: 260,
+                nimHeight: 260,
                 width: "100%",
                 overflow: "hidden",
                 outline: "none",
@@ -540,7 +551,7 @@ const DeviceDetails = () => {
               onMouseDown={(e) => e.preventDefault()}
               
             >
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height= {260}>
                 <AreaChart
                   data={[...telemetryHistory].reverse()}
                   margin={{ top: 15, right: 20, left: 10, bottom: 0 }}

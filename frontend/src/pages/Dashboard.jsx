@@ -18,6 +18,8 @@ const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [devices, setDevices] = useState([]);
   const [editingDeviceId, setEditingDeviceId] = useState(null);
+  const [visibleSecrets, setVisibleSecrets] = useState({});
+  const [copiedDeviceId, setCopiedDeviceId] = useState(null);
   const [editName, setEditName] = useState("");
   const navigate = useNavigate();
   
@@ -81,6 +83,53 @@ const Dashboard = () => {
     return { total, on, pending };
   };
   
+  /**
+   * DEVICE SECRET
+   */
+   
+  const toggleSecret = (deviceId) => {
+    setVisibleSecrets(prev => ({
+      ...prev,
+      [deviceId]: !prev[deviceId],
+    }));
+  };
+  
+  const maskSecret = (secret) => {
+    if (!secret) return "";
+    return secret.slice(0, 4) + "••••••••••" + secret.slice(-4);
+  };
+
+  const copySecret = async (deviceId, secret) => {
+    try {
+      // Try modern clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(secret);
+      } else {
+        // 🔁 Fallback for mobile / insecure context
+        const textArea = document.createElement("textarea");
+        textArea.value = secret;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+  
+      setCopiedDeviceId(deviceId);
+      setTimeout(() => setCopiedDeviceId(null), 2000);
+    } catch (err) {
+      console.error("Copy failed:", err);
+      alert("Unable to copy. Long-press to copy manually.");
+    }
+  };
+  
+  
+  /**
+   * HANDLE DELETE
+   */
+    
   const handleDeleteDevice = async (deviceId) => {
     const ok = window.confirm("Delete this device?");
     if (!ok) return;
@@ -94,9 +143,9 @@ const Dashboard = () => {
     }
   };
   
-  const startEditDevice = (item) => {
-    setEditingDeviceId(item._id);
-    setEditName(item.name);
+  const startEditDevice = (device) => {
+    setEditingDeviceId(device._id);
+    setEditName(device.name);
   };
   
   const saveEditDevice = async (deviceId) => {
@@ -154,17 +203,14 @@ const Dashboard = () => {
         <button
           onClick={handleAddDevice}
           style={{
-            marginBottom: "1.25rem",
-            padding: "0.6rem 1rem",
-            borderRadius: 8,
-            border: "none",
-            background: COLORS.primaryLight,
-            color: COLORS.textInverse,
-            fontWeight: 600,
+            ...iconButton,
+            ...FONTS.h3,
+            marginBottom:".7rem",
+            
             cursor: "pointer",
           }}
         >
-          ➕ Add Device
+          ➕ Add New Device
         </button>
   
         {devices.length === 0 && (
@@ -182,35 +228,35 @@ const Dashboard = () => {
             gap: "1rem",
           }}>
           
-          {devices.map((item) => {
-            const { total, on, pending } = getDeviceStats(item);
-            const isOffline = item.status !== "online";
+          {devices.map((device) => {
+            const { total, on, pending } = getDeviceStats(device);
+            const isOffline = device.status !== "online";
   
             return (
               <li
-                key={item._id}
+                key={device._id}
                 
                 style={{
                   position: "relative",
                   borderRadius: 12,
-                  boxShadow: item.status === "online" ? COLORS.shadowSoft: COLORS.shadowDarkGray,
-                  border: item.status === "online" ? `.1rem solid ${COLORS.accentDark}` :`.1rem solid ${COLORS.textSecondary}`,
+                  boxShadow: device.status === "online" ? COLORS.shadowSoft: COLORS.shadowDarkGray,
+                  border: device.status === "online" ? `.1rem solid ${COLORS.accentDark}` :`.1rem solid ${COLORS.textSecondary}`,
                   padding: "1rem",
                   paddingBottom: "4rem",
-                  opacity: item.status !== "online" ? 0.6 : 1,
-                  background: item.status === "online" ? "#f9fafb" : "#fff",
-                  pointerEvents: item.status === "online" ? "auto" : "none",
+                  opacity: device.status !== "online" ? 0.6 : 1,
+                  background: device.status === "online" ? "#f9fafb" : "#fff",
+                  pointerEvents: device.status === "online" ? "auto" : "none",
                 }}
               >
                 {/* MAIN CLICK AREA */}
                 <div
                   onClick={() =>
-                    item.status === "online" &&
-                    navigate(`/device/${item._id}`)
+                    device.status === "online" &&
+                    navigate(`/device/${device._id}`)
                   }
                   style={{
                     
-                    cursor: item.status === "online" ? "pointer" : "default",
+                    cursor: device.status === "online" ? "pointer" : "default",
                   }}
                 >
                   {/* HEADER */}
@@ -223,7 +269,7 @@ const Dashboard = () => {
                   >
                     <div>
                       <strong style={{ fontSize: 16, color: COLORS.textPrimary }}>
-                        {item.name}
+                        {device.name}
                       </strong>
                       <div
                         style={{
@@ -231,7 +277,7 @@ const Dashboard = () => {
                           color: COLORS.textSecondary,
                         }}
                       >
-                        ID: {item.deviceId}
+                        ID: {device.deviceId}
                       </div>
                     </div>
   
@@ -240,12 +286,12 @@ const Dashboard = () => {
                         fontSize: 12,
                         fontWeight: 600,
                         color:
-                          item.status === "online"
+                          device.status === "online"
                             ? COLORS.success
                             : COLORS.error,
                       }}
                     >
-                      {item.status === "online" ? "🟢 Online" : "🔴 Offline"}
+                      {device.status === "online" ? "🟢 Online" : "🔴 Offline"}
                     </span>
                   </div>
   
@@ -276,52 +322,153 @@ const Dashboard = () => {
                       color: COLORS.textSecondary,
                     }}
                   >
-                    Last seen: {timeAgo(item.lastSeen)}
+                    Last seen: {timeAgo(device.lastSeen)}
                   </div>
                 </div>
-  
-                {/* ACTIONS */}
+                
+                {/* FOOTER ACTIONS AREA */}
                 <div
                   style={{
                     position:"absolute",
                     bottom: 0,left:0,
                     width:"100%",
-                    display: "flex",
-                    padding: ".7rem",
+                    padding: ".5rem 1rem",
                     borderRadius:"0 0 10px 10px",
-                    justifyContent: "space-between",
-                    backgroundColor: item.status === "online" ? COLORS.accentLight : COLORS.lightGray,
-                    gap: "0.75rem",
-                    marginTop: 12,
+                    backgroundColor: device.status === "online" ? COLORS.accentLight : COLORS.lightGray,
                   }}
                 >
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      startEditDevice(item);
-                    }}
-                    style={iconButton}
-                  >
-                    ✏️
-                  </button>
-  
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteDevice(item._id);
-                    }}
+                  {/*DEVICE FOOTER AREA*/}
+                  <div 
                     style={{
-                      ...iconButton,
-                      border: `.1rem solid ${COLORS.error}`,
-                      backgroundColor : COLORS.bgPage,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      width: "100%",
+                      margin: 0,
+                      padding: 0,
                     }}
+                  
                   >
-                    🗑️
-                  </button>
+                    
+                    {/* 🔐 DEVICE SECRET */}
+                      
+                    { device.status === "online" && (
+                      <div 
+                        style={{ 
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          margin: 0,
+                          padding: 0,
+                          gap:".2rem"
+                        }}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSecret(device._id);
+                          }}
+                          style={{
+                            ...ghostBtn,
+                            fontSize: FONTS.lg,
+                            margin:"0",
+                            backgroundColor: COLORS.bgPage,
+                            color: COLORS.warning,
+                            border:`2px solid ${COLORS.info}`, 
+                          }}
+                        >
+                          🔐 {visibleSecrets[device._id] ? "Hide Device Secret" : "Show Device Secret"}
+                        </button>
+                        
+                        {/* inline secret token Show/hide */}
+                        {visibleSecrets[device._id] && (
+                          <div
+                            style={{
+                              padding: "0.1rem .2rem",
+                              borderRadius: 8,
+                              background: COLORS.bgMuted,
+                              border: `1px dashed ${COLORS.warning}`,
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "0.5rem",
+                              flexWrap: "wrap",
+                              marginRight:".5rem"
+                            }}
+                          >
+                            <code
+                              style={{
+                                background: "#000",
+                                color: "#0ff",
+                                padding: "0.4rem 0.6rem",
+                                borderRadius: 6,
+                                fontSize: FONTS.sm,
+                                fontFamily: "monospace",
+                              }}
+                            >
+                              {maskSecret(device.secret)}
+                            </code>
+                      
+                            <button
+                              style={{
+                                ...iconButton,
+                                width: "80px",
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copySecret(device._id, device.secret);
+                              }}
+                            >
+                              📋 Copy
+                            </button>
+                      
+                            {copiedDeviceId === device._id && (
+                              <span style={{ fontSize: 12, color: COLORS.success }}>
+                                Copied!
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>  
+                    )}
+                    
+                    {/* EDIT DEVICE AREA */}
+                    <div 
+                      style={{ 
+                        gap: ".2rem",
+                        display:"flex",
+                        justifyContent:"space-between",
+                        marginLeft: "auto",
+                    }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          startEditDevice(device);
+                        }}
+                        style={iconButton}
+                      >
+                        ✏️
+                      </button>
+      
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteDevice(device._id);
+                        }}
+                        style={{
+                          ...iconButton,
+                          border: `.1rem solid ${COLORS.error}`,
+                          backgroundColor : COLORS.bgPage,
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
                 </div>
   
                 {/* INLINE EDIT */}
-                {editingDeviceId === item._id && (
+                {editingDeviceId === device._id && (
                   <div
                     style={{
                       marginTop: "0.75rem",
@@ -334,13 +481,15 @@ const Dashboard = () => {
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
                       style={{
-                        flex: 1,
-                        padding: "0.45rem",
-                        borderRadius: 6,
-                        border: `1px solid ${COLORS.borderLight}`,
+                        ...inputStyle,
+                        border:`1px solid ${COLORS.borderDark}`
                       }}
                     />
-                    <button style={primaryBtn} onClick={() => saveEditDevice(item._id)}>
+                    <button style={{
+                              ...iconButton,
+                              ...FONTS.h3,
+                            }} 
+                      onClick={() => saveEditDevice(device._id)}>
                       Save
                     </button>
                     <button style={ghostBtn} onClick={cancelEdit}>
@@ -383,7 +532,6 @@ const selectStyle = {
 const iconButton = {
   padding: "6px 10px",
   borderRadius: 8,
-  width: "60px",
   color: COLORS.bgNavbar,
   fontSize: 16,
   border: `none`,

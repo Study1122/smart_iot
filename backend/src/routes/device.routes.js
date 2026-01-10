@@ -11,6 +11,7 @@ import {
   deviceHeartbeat,
   updateDevice,
   deleteDevice,
+  getDeviceSecret,
   updateDeviceFeatureMeta,
   deleteDeviceFeature,
 } from "../controllers/device.controller.js";
@@ -41,6 +42,7 @@ router.post("/heartbeat", deviceAuthMiddleware,
 );
 router.post("/", authMiddleware, registerDevice);
 router.get("/", authMiddleware, getUserDevices);
+router.get("/:id/secret", authMiddleware, getDeviceSecret);
 router.patch("/:id", authMiddleware, updateDevice);
 router.delete("/:id", authMiddleware, deleteDevice);
 router.get("/:id", authMiddleware, getDeviceById);
