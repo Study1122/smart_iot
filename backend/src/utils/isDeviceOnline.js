@@ -1,4 +1,4 @@
-export const isDeviceOnline = (lastSeen, thresholdSeconds = 120) => {
+export const isDeviceOnline = (lastSeen, thresholdSeconds = 60) => {
   if (!lastSeen) return false;
 
   const now = Date.now();

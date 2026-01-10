@@ -492,7 +492,10 @@ const Dashboard = () => {
                       onClick={() => saveEditDevice(device._id)}>
                       Save
                     </button>
-                    <button style={ghostBtn} onClick={cancelEdit}>
+                    <button style={{
+                              ...ghostBtn,
+                              border: `1px solid ${COLORS.error}`,
+                    }} onClick={cancelEdit}>
                       Cancel
                     </button>
                   </div>

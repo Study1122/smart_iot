@@ -3,7 +3,7 @@ import Device from "../models/device.model.js";
 import { isDeviceOnline } from "./isDeviceOnline.js";
 
 const startDeviceStatusCron = () => {
-  cron.schedule("*/30 * * * * *", async () => {
+  cron.schedule("* * * * * *", async () => {
     try {
       const devices = await Device.find();
 
