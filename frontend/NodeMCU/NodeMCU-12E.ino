@@ -1,7 +1,7 @@
 #include "FeatureState.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <WiFiClient.h>
+#include <WiFiClientSecure.h>
 #include <ArduinoJson.h>
 #include <Arduino.h>
 
@@ -21,24 +21,24 @@ int levelToPwm(int level) {
   return map(level, 1, 5, 200, PWM_MAX);
 }
 
-const char* ssid = "wifi_ssid_name";
-const char* password = "your_wifi_password";
+const char* ssid = "<wifi_ssid_name>";
+const char* password = "<password>";
 
-const char* serverUrl = "http://<backend_ip>:5000";
-const char* deviceId = "<deviceId>";
+const char* serverUrl = "<backend_url>";
+const char* deviceId = "<deviceId>"; //not device._id
 const char* deviceSecret = "<deviceSecret>";
 
 /* ================== GLOBALS ================== */
 
-WiFiClient client;
+WiFiClientSecure client;
 
 unsigned long lastHeartbeat = 0;
 unsigned long lastCommandPoll = 0;
 unsigned long lastTelemetrySend = 0;
 
-const unsigned long HEARTBEAT_INTERVAL = 20000;
-const unsigned long COMMAND_INTERVAL   = 5000;
-const unsigned long TELEMETRY_INTERVAL = 29000; // 30 sec
+const unsigned long HEARTBEAT_INTERVAL = 10000;
+const unsigned long COMMAND_INTERVAL   = 1500;
+const unsigned long TELEMETRY_INTERVAL = 60000; // 10 sec
 
 FeatureState featureStates[10];
 int featureCount = 0;
@@ -213,6 +213,7 @@ void fetchCommands() {
 void setup() {
   Serial.begin(115200);
   connectWiFi();
+  client.setInsecure();
   dht.begin();
 }
 
