@@ -6,6 +6,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [existingUser,setExistingUser] = useState(false);
   const navigate = useNavigate();
   
   //auto redirect if user already logged In
