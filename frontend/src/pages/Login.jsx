@@ -42,7 +42,7 @@ const Login = () => {
         minHeight: "100svh",
         display: "flex",
         justifyContent: "center",
-        overflow: "hidden", //🔒 prevents keyboard scroll
+        overflowY: "auto", //🔒 prevents keyboard scroll
         alignItems: "center",
         backgroundColor: COLORS.accentLight,
         padding: "1rem",

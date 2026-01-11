@@ -27,7 +27,7 @@ const Register = () => {
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: COLORS.accentLight,
-            overflow: "hidden", // 🔒 stops keyboard scroll
+            overflowY: "auto", // 🔒 stops keyboard scroll
             padding: "1rem",
           }}
         >
