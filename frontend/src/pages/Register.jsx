@@ -22,11 +22,12 @@ const Register = () => {
   return (
         <div
           style={{
-            minHeight: "100vh",
+            minHeight: "100svh",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: COLORS.accentLight,
+            overflow: "hidden", // 🔒 stops keyboard scroll
             padding: "1rem",
           }}
         >

@@ -38,9 +38,10 @@ const Login = () => {
     
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100svh",
         display: "flex",
         justifyContent: "center",
+        overflow: "hidden", //🔒 prevents keyboard scroll
         alignItems: "center",
         backgroundColor: COLORS.accentLight,
         padding: "1rem",

@@ -1,3 +1,4 @@
+import Loader from "../components/Loader";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
@@ -170,7 +171,7 @@ const Dashboard = () => {
   };
 
   if (!user) {
-    return <p>Loading...</p>;
+    return <Loader text="Checking session..." />;
   }
 
   return (

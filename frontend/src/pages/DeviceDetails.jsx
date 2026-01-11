@@ -1,3 +1,4 @@
+import Loader from "../components/Loader";
 import { connectSocket, disconnectSocket } from "../services/socket";
 import Navbar from "../components/Navbar/Navbar";
 import { getMe } from "../services/auth";
@@ -5,6 +6,7 @@ import { COLORS } from "../constants/colors";
 import { FONTS } from "../constants/fonts";
 import { timeAgo } from "../services/timeAgo";
 import { useEffect, useState } from "react";
+
 import { useParams, useNavigate } from "react-router-dom";
 import { GPIO_PINS, 
          getGpioByValue,
@@ -326,7 +328,7 @@ const DeviceDetails = () => {
     };
   }, [currentDevice?._id]);
 
-  if (!user || !currentDevice) return <p style={{ padding: 20 }}>Loading...</p>;
+  if (!user || !currentDevice) return <Loader text="Checking session..." />;
   
   const isDeviceOffline =currentDevice.status !== "online";
   
