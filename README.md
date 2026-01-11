@@ -1,8 +1,9 @@
 # 🚀 Smart IoT Platform
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-v1.1.5-blue.svg)
 ![Node.js](https://img.shields.io/badge/node-%3E%3D18-green.svg)
-![MongoDB](https://img.shields.io/badge/database-MongoDB-brightgreen.svg)
+![Database](https://img.shields.io/badge/database-MongoDB%20Atlas-47A248?logo=mongodb&logoColor=white)
+![Deployed](https://img.shields.io/badge/deployed-Render-46E3B7?logo=render&logoColor=white)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey.svg)
 ![Status](https://img.shields.io/badge/status-stable-success.svg)
 
@@ -15,10 +16,12 @@ This system is designed with **real IoT constraints in mind**, not just UI toggl
 ## ✨ Key Features
 
 ### 🔐 Authentication & Security
-- JWT-based authentication
-- Protected API routes
-- User-scoped devices (multi-user ready)
-
+- Device authentication via deviceId + secret
+- Secrets never exposed in plaintext UI
+- User-scoped device access
+- Firmware cannot access user routes
+- JWT-based auth for all user APIs
+- 
 ### 📡 Device Management
 - Register devices with unique `deviceId`
 - Online / Offline detection via heartbeat
@@ -53,7 +56,11 @@ This system is designed with **real IoT constraints in mind**, not just UI toggl
 ---
 
 ## 🧱 Architecture Overview
----
+> ⚠️ Note:
+> Current implementation primarily uses HTTP polling + heartbeat.
+> WebSocket-based real-time sync is partially implemented and planned
+> as a future stable enhancement after firmware-side confirmation.
+
 ```
   Frontend (React)
    ├── Dashboard (Devices Overview)
@@ -74,27 +81,27 @@ This system is designed with **real IoT constraints in mind**, not just UI toggl
    ├── GPIO control
    └── Reported state updates
 ```
----
+  ---
 
 ## 🔁 Device State Flow
 
-```
-UI Action
-   ↓
-desiredState / desiredLevel
-   ↓
-Backend API
-   ↓
-Device polls commands
-   ↓
-Hardware changes
-   ↓
-reportedState / reportedLevel
-   ↓
-UI shows SYNCED
-
-```
----
+  ```
+  UI Action
+     ↓
+  desiredState / desiredLevel
+     ↓
+  Backend API
+     ↓
+  Device polls commands
+     ↓
+  Hardware changes
+     ↓
+  reportedState / reportedLevel
+     ↓
+  UI shows SYNCED
+  
+  ```
+  ---
 
 ```md
 
@@ -135,17 +142,18 @@ UI shows SYNCED
 
 ```
 ---
-# Fronten
+### 🧑‍💻 Frontend
 ```
 npm install
-npm run device
+npm run dev || npm start
 
 ```
-# Backend
+### 🛢️ Backend
 ```
 npm install
-npm run device
+npm run dev
 ```
+---
 ## 📂 Project structure
 ```
 
@@ -186,19 +194,20 @@ npm install --save-dev nodemon
 
 
 
-🚦 Status Handling
+## 🚦 Status Handling
 
-State              Meaning
----
-🟢 Online          Device recently heartbeated
----
-🔴 Offline         Device missed heartbeat
----
-⏳ Pending         Desired ≠ Reported
----
-✅ Synced          Desired = Reported
----
-
+  ```
+  State              Meaning
+  ---
+  🟢 Online          Device recently heartbeated
+  ---
+  🔴 Offline         Device missed heartbeat
+  ---
+  ⏳ Pending         Desired ≠ Reported
+  ---
+  ✅ Synced          Desired = Reported
+  ---
+  ```
 ## 🔮 Future Enhancements
 
  - WebSocket / MQTT live updates
@@ -208,15 +217,16 @@ State              Meaning
  - Device grouping & automation scenes
 
 ## 📜 License
- - Licensed under the MIT License.
- - 
+
+ - Licensed under the **MIT License**.
  
 ## 👤 Author
- - Smart IoT Platform
- - Built with ❤️ for real-world IoT use cases
- - 
+
+- **Study1122**
+- Full Stack + IoT Engineer
+- Smart IoT Platform
  
 ## ⭐ Final Note
  - This is not a demo dashboard.
  - It is a real IoT control system built with correct     synchronization, safety, and scalability principles.
- - If you’re reading this — you already built something serious. 🚀
+
