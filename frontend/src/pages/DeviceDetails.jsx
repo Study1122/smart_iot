@@ -281,7 +281,7 @@ const DeviceDetails = () => {
     };
 
     fetchData();
-    intervalId = setInterval(fetchData, 5000);
+    intervalId = setInterval(fetchData, 10000);
     return () => clearInterval(intervalId);
   }, [id, navigate]);
   
