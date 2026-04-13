@@ -22,13 +22,17 @@ const Register = () => {
   return (
         <div
           style={{
-            minHeight: "100svh",
+            height: "100vh",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             backgroundColor: COLORS.accentLight,
-            overflowY: "auto", // 🔒 stops keyboard scroll
+            overflow: "hidden", // 🔒 stops keyboard scroll
+            position: "fixed",
             padding: "1rem",
+            top: 0,
+            left: 0,
+            width: "100%",
           }}
         >
           <div

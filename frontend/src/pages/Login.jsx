@@ -39,13 +39,17 @@ const Login = () => {
     
     <div
       style={{
-        minHeight: "100svh",
+        height: "100vh",
         display: "flex",
         justifyContent: "center",
-        overflowY: "auto", //🔒 prevents keyboard scroll
         alignItems: "center",
         backgroundColor: COLORS.accentLight,
+        overflow: "hidden", // 🔒 stops keyboard scroll
+        position: "fixed",
         padding: "1rem",
+        top: 0,
+        left: 0,
+        width: "100%",
       }}
     >
       <div
