@@ -53,7 +53,7 @@ const Register = () => {
             color: COLORS.textPrimary,
           }}
         >
-          Create Account
+          Registration
         </h1>
 
         <form
