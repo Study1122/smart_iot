@@ -46,6 +46,10 @@ export const getMe = async () => {
 
     return res.data;
   } catch (err) {
+    if (err.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
     return {
       success: false,
       message: "Unauthorized",

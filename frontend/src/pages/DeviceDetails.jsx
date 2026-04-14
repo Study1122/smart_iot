@@ -198,7 +198,8 @@ const DeviceDetails = () => {
       gpio: feature.gpio,
     });
   };
-
+  
+  /* ---------------- Save FEATURE ---------------- */
   const saveEditFeature = async (featureId) => {
     const res = await updateFeatureMeta(
       currentDevice._id,
@@ -257,9 +258,8 @@ const DeviceDetails = () => {
     const fetchData = async () => {
       const userRes = await getMe();
       if (!userRes.success) {
-        localStorage.removeItem("token");
-        navigate("/login");
-        return;
+        console.warn("getMe failed — skipping");
+        return; // DO NOT logout
       }
       setUser(userRes.user);
 
@@ -281,7 +281,7 @@ const DeviceDetails = () => {
     };
 
     fetchData();
-    intervalId = setInterval(fetchData, 10000);
+    intervalId = setInterval(fetchData, 25000);
     return () => clearInterval(intervalId);
   }, [id, navigate]);
   

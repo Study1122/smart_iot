@@ -1,6 +1,6 @@
 import Loader from "../components/Loader";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getMe } from "../services/auth";
 import { timeAgo } from "../services/timeAgo";
 import { COLORS } from "../constants/colors";
@@ -13,9 +13,13 @@ import {
   deleteDevice, 
 } from "../services/deviceService";
 
+import { 
+  getLatestTelemetry,
+} from "../services/telemetry";
+
 import Navbar from "../components/Navbar/Navbar";
 const Dashboard = () => {
-  
+  const {id} = useParams();
   const [user, setUser] = useState(null);
   const [devices, setDevices] = useState([]);
   const [editingDeviceId, setEditingDeviceId] = useState(null);
@@ -23,6 +27,7 @@ const Dashboard = () => {
   const [copiedDeviceId, setCopiedDeviceId] = useState(null);
   const [editName, setEditName] = useState("");
   const navigate = useNavigate();
+  const [telemetryMap, setTelemetryMap] = useState({});
   
   
   useEffect(() => {
@@ -37,15 +42,33 @@ const Dashboard = () => {
         return;
       }
       
-    setUser(res.user);
-    
-    const deviceRes = await getUserDevices();
+      setUser(res.user);
+      
+      /*** fetch telenetry for each debices ***/
+      
+      const deviceRes = await getUserDevices();
+      
       if (deviceRes.success) {
         setDevices(deviceRes.devices);
+      
+        // 🔥 fetch telemetry for each device
+        const telemetryData = {};
+      
+        await Promise.all(
+          deviceRes.devices.map(async (device) => {
+            const res = await getLatestTelemetry(device._id);
+            if (res.success) {
+              telemetryData[device._id] = res.telemetry;
+            }
+          })
+        );
+      
+        setTelemetryMap(telemetryData);
+        
       }
     };
     init();
-    intervalId = setInterval(init, 5000); // 🔄 refresh status every
+    intervalId = setInterval(init, 25000); // 🔄 refresh status every
     return () => clearInterval(intervalId);
   }, [navigate]);
   
@@ -84,9 +107,7 @@ const Dashboard = () => {
     return { total, on, pending };
   };
   
-  /**
-   * DEVICE SECRET
-   */
+  /*** DEVICE SECRET*/
    
   const toggleSecret = (deviceId) => {
     setVisibleSecrets(prev => ({
@@ -127,9 +148,7 @@ const Dashboard = () => {
   };
   
   
-  /**
-   * HANDLE DELETE
-   */
+  /*** HANDLE DELETE*/
     
   const handleDeleteDevice = async (deviceId) => {
     const ok = window.confirm("Delete this device?");
@@ -198,7 +217,13 @@ const Dashboard = () => {
           marginBottom: "1rem" 
           
         }}>
-          Your Devices
+          <strong
+          style ={{
+            ...FONTS.h3,
+            
+          }}>
+            Your Devices
+          </strong>
         </p>
   
         <button
@@ -232,7 +257,7 @@ const Dashboard = () => {
           {devices.map((device) => {
             const { total, on, pending } = getDeviceStats(device);
             const isOffline = device.status !== "online";
-  
+            const telemetry = telemetryMap[device._id];
             return (
               <li
                 key={device._id}
@@ -246,7 +271,8 @@ const Dashboard = () => {
                   paddingBottom: "4rem",
                   opacity: device.status !== "online" ? 0.6 : 1,
                   background: device.status === "online" ? "#f9fafb" : "#fff",
-                  pointerEvents: device.status === "online" ? "auto" : "none",
+                  /*pointerEvents: device.status === "online" ? "auto" : "none",
+                  */
                 }}
               >
                 {/* MAIN CLICK AREA */}
@@ -266,10 +292,15 @@ const Dashboard = () => {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
+                      
                     }}
                   >
                     <div>
-                      <strong style={{ fontSize: 16, color: COLORS.textPrimary }}>
+                      <strong 
+                        style={{ 
+                          fontSize: 16, 
+                          color: COLORS.textPrimary 
+                        }}>
                         {device.name}
                       </strong>
                       <div
@@ -295,25 +326,48 @@ const Dashboard = () => {
                       {device.status === "online" ? "🟢 Online" : "🔴 Offline"}
                     </span>
                   </div>
+                  
+                  {/* ====TELEMETRY_JSX ==== */}
+                  {telemetry && (
+                    <div style={{
+                      ...FONTS.h3,
+                      fontSize: FONTS.md,
+                      display: "flex",
+                      marginTop:".6rem",
+                      padding: 0,
+                      flexWrap: "wrap",
+                      
+                    }}>
+                      {telemetry.temperature !== undefined && (
+                        <div>🌡️ Temp: <strong>{telemetry.temperature}°C</strong></div>
+                      )}
+                  
+                      {telemetry.humidity !== undefined && (
+                        <div>💧 Humidity: <strong>{telemetry.humidity}%</strong></div>
+                      )}
+                  
+                      {telemetry.voltage !== undefined && (
+                        <div>🔋 Voltage: <strong>{telemetry.voltage} V</strong></div>
+                      )}
+                    </div>
+                  )}
   
                   {/* STATS */}
-                  <div
-                    style={{
+                  <div style={{
                       display: "flex",
                       gap: "1rem",
                       marginTop: "0.6rem",
                       fontSize: 13,
                       color: COLORS.textSecondary,
-                    }}
-                  >
+                      
+                    }}>
                     <span>⚙️ {total} Features</span>
                     <span>🟢 {on} ON</span>
                     {pending > 0 && (
                       <span style={{ color: COLORS.warning }}>
                         ⏳ {pending} Syncing
                       </span>
-                    )}
-                  </div>
+                    )}</div>
   
                   {/* LAST SEEN */}
                   <div
@@ -378,7 +432,7 @@ const Dashboard = () => {
                             border:`2px solid ${COLORS.info}`, 
                           }}
                         >
-                          🔐 {visibleSecrets[device._id] ? "Hide Device Secret" : "Show Device Secret"}
+                          🔐 {visibleSecrets[device._id] ? "Hide" : "Token"}
                         </button>
                         
                         {/* inline secret token Show/hide */}
