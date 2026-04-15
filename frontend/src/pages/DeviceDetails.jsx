@@ -100,6 +100,7 @@ const DeviceDetails = () => {
       setShowSecret(true);
     }
   };
+  
   //telemetry data
   const [latestTelemetry, setLatestTelemetry] = useState(null);
   const [telemetryHistory, setTelemetryHistory] = useState([]);
@@ -253,6 +254,7 @@ const DeviceDetails = () => {
     let intervalId;
 
     const fetchData = async () => {
+      console.log("🚀 Fetching DeviceDetails data...");
       const userRes = await getMe();
       if (!userRes.success) {
         console.warn("getMe failed — skipping");
@@ -261,16 +263,20 @@ const DeviceDetails = () => {
       setUser(userRes.user);
 
       const deviceRes = await getDeviceById(id);
+      console.log("📦 deviceRes:", deviceRes);
       if (deviceRes.success) {
         setCurrentDevice(deviceRes.device);
         
         // 🔥 Fetch latest telemetry
         const telemetryRes = await getLatestTelemetry(id);
+        console.log("🌡️ latestTelemetry:", telemetryRes);
         if (telemetryRes.success) {
           setLatestTelemetry(telemetryRes.telemetry);
         }
+        
         //fetch telemetry History
         const historyRes= await getTelemetryHistory(id, 20);
+        console.log("📈 telemetryHistory:", historyRes);
         if (historyRes.success) {
           setTelemetryHistory(historyRes.telemetry);
         }
