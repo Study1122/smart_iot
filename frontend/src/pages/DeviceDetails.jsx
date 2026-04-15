@@ -140,10 +140,7 @@ const DeviceDetails = () => {
       ...prev,
       features: prev.features.map((f) =>
         f.featureId === feature.featureId
-          ? { ...f, desiredLevel: level, desiredState: level > 0 }
-          : f
-      ),
-    }));
+          ? { ...f, desiredLevel: level, desiredState: level > 0 }: f),}));
     
     const prevLevel = feature.desiredLevel;
     

@@ -28,18 +28,11 @@ router.post("/ping", deviceAuthMiddleware, (req, res) => {
   });
 });
 
-router.get("/commands",
-  deviceAuthMiddleware,
-  getDeviceCommands );
-  
-router.post("/report",
-  deviceAuthMiddleware,
-  reportDeviceState);
+router.get("/commands",deviceAuthMiddleware,getDeviceCommands );
+router.post("/report",deviceAuthMiddleware,reportDeviceState);
 
 //
-router.post("/heartbeat", deviceAuthMiddleware,
-  deviceHeartbeat
-);
+router.post("/heartbeat", deviceAuthMiddleware,deviceHeartbeat);
 router.post("/", authMiddleware, registerDevice);
 router.get("/", authMiddleware, getUserDevices);
 router.get("/:id/secret", authMiddleware, getDeviceSecret);
