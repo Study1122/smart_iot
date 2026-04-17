@@ -263,20 +263,20 @@ const DeviceDetails = () => {
       setUser(userRes.user);
 
       const deviceRes = await getDeviceById(id);
-      console.log("📦 deviceRes:", deviceRes);
+      
       if (deviceRes.success) {
         setCurrentDevice(deviceRes.device);
         
         // 🔥 Fetch latest telemetry
         const telemetryRes = await getLatestTelemetry(id);
-        console.log("🌡️ latestTelemetry:", telemetryRes);
+        
         if (telemetryRes.success) {
           setLatestTelemetry(telemetryRes.telemetry);
         }
         
         //fetch telemetry History
         const historyRes= await getTelemetryHistory(id, 20);
-        console.log("📈 telemetryHistory:", historyRes);
+        
         if (historyRes.success) {
           setTelemetryHistory(historyRes.telemetry);
         }
