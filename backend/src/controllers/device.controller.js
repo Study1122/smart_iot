@@ -52,7 +52,7 @@ export const registerDevice = async (req, res) => {
  */
 export const getUserDevices = async (req, res) => {
   try {
-    const devices = await Device.find({ owner: req.user._id }).select("-secret -__v");
+    const devices = await Device.find({ owner: req.user._id }).select("-__v");
 
     res.status(200).json({
       success: true,
