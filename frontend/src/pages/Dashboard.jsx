@@ -402,11 +402,9 @@ const Dashboard = () => {
                       margin: 0,
                       padding: 0,
                     }}
-                  
                   >
-                    
                     {/* 🔐 DEVICE SECRET */}
-                      
+                    
                     { device.status === "online" && (
                       <div 
                         style={{ 
@@ -496,15 +494,17 @@ const Dashboard = () => {
                     }}
                     >
                       <button
+                        
                         onClick={(e) => {
                           e.stopPropagation();
                           startEditDevice(device);
                         }}
                         style={iconButton}
+                        
                       >
                         ✏️
                       </button>
-      
+                      
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -521,7 +521,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                 </div>
-  
+                
                 {/* INLINE EDIT */}
                 {editingDeviceId === device._id && (
                   <div
